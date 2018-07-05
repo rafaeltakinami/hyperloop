@@ -1,0 +1,16 @@
+dependencies {
+
+}
+
+apply plugin: 'com.novoda.bintray-release'
+
+publish {
+    artifactId = 'owlbear-core'
+    autoPublish = true
+    desc = 'Core classes for owlbear'
+    groupId = 'br.com.guiabolso'
+    licences = ['APACHE-2.0']
+    publishVersion = parent.ext.publish_version
+    uploadName = 'Owlbear-Core'
+    website = 'https://github.com/GuiaBolso/owlbear'
+}

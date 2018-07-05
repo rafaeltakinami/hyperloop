@@ -1,0 +1,35 @@
+# Compiled class file
+*.class
+
+# Log file
+*.log
+
+# Package Files #
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+*.rar
+*.tmp
+*.bak
+*.swp
+*~.nib
+*.iml
+
+.idea/
+.idea_modules/
+.gradle/
+.metadata
+.settings/
+.loadpath
+.recommenders
+
+out/
+hs_err_pid*
+build/
+bin/
+tmp/
+
+
+!/gradle/wrapper/gradle-wrapper.jar

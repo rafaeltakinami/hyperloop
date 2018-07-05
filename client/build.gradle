@@ -1,0 +1,21 @@
+dependencies {
+    compile project(":core")
+
+    compile 'com.github.kittinunf.fuel:fuel:1.10.0'
+
+    testCompile project(':core').sourceSets.test.output
+}
+
+
+apply plugin: 'com.novoda.bintray-release'
+
+publish {
+    artifactId = 'owlbear-client'
+    autoPublish = true
+    desc = 'Client helpers for owlbear'
+    groupId = 'br.com.guiabolso'
+    licences = ['APACHE-2.0']
+    publishVersion = parent.ext.publish_version
+    uploadName = 'Owlbear-Client'
+    website = 'https://github.com/GuiaBolso/owlbear'
+}
