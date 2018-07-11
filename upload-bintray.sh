@@ -1,6 +1,6 @@
 #!/bin/bash
 
-modules=("core" "server" "client")
+modules=("sender" "validator")
 
 for i in "${modules[@]}"
 do

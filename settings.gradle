@@ -1,2 +1,2 @@
 rootProject.name = 'owlbear'
-include 'core', 'server', 'client'
+include 'sender', 'validator'
