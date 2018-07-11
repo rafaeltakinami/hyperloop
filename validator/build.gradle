@@ -1,21 +1,19 @@
 dependencies {
-    compile project(":core")
+    compile project(":sender")
 
-    compile 'com.github.kittinunf.fuel:fuel:1.10.0'
-
-    testCompile project(':core').sourceSets.test.output
+    testCompile project(':sender').sourceSets.test.output
 }
 
 
 apply plugin: 'com.novoda.bintray-release'
 
 publish {
-    artifactId = 'owlbear-client'
+    artifactId = 'owlbear-validator'
     autoPublish = true
-    desc = 'Client helpers for owlbear'
+    desc = 'Validator classes for owlbear'
     groupId = 'br.com.guiabolso'
     licences = ['APACHE-2.0']
     publishVersion = parent.ext.publish_version
-    uploadName = 'Owlbear-Client'
+    uploadName = 'Owlbear-Validator'
     website = 'https://github.com/GuiaBolso/owlbear'
 }

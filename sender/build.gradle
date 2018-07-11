@@ -1,19 +1,16 @@
 dependencies {
-    compile project(":core")
 
-    testCompile project(':core').sourceSets.test.output
 }
-
 
 apply plugin: 'com.novoda.bintray-release'
 
 publish {
-    artifactId = 'owlbear-server'
+    artifactId = 'owlbear-sender'
     autoPublish = true
-    desc = 'Server side helpers for owlbear'
+    desc = 'Sender classes for owlbear'
     groupId = 'br.com.guiabolso'
     licences = ['APACHE-2.0']
     publishVersion = parent.ext.publish_version
-    uploadName = 'Owlbear-Server'
+    uploadName = 'Owlbear-Sender'
     website = 'https://github.com/GuiaBolso/owlbear'
 }
