@@ -1,7 +1,7 @@
 schema:
   version: 1
 
-event_name: xpto
+event_name: event_test
 event_version: 1
 
 validation:
