@@ -1,5 +1,8 @@
 dependencies {
+    compile project(":validator")
 
+    compile 'com.amazonaws:aws-java-sdk-sqs:1.11.366'
+    compile 'com.github.salomonbrys.kotson:kotson:2.5.0'
 }
 
 apply plugin: 'com.novoda.bintray-release'
