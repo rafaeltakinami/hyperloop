@@ -1,6 +1,9 @@
 dependencies {
     compile project(":sender")
 
+    compile 'com.amazonaws:aws-java-sdk-s3:1.11.367'
+    compile 'com.github.ben-manes.caffeine:caffeine:2.6.0'
+
     testCompile project(':sender').sourceSets.test.output
 }
 
