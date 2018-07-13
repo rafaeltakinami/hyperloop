@@ -19,6 +19,20 @@ validation:
       format: YYYY/MM/DD - HH-mm-SS
       required: true
       encrypted: false
+    nested_key:
+      type: object
+      required: true
+      keys:
+        key3:
+            type: string
+            required: true
+            encrypted: true
+        key4:
+            type: string
+            required: true
+            encrypted: false
+
+
   identity:
     userId:
       type: long
