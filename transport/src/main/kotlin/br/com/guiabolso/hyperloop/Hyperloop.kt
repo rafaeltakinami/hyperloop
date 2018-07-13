@@ -1,12 +1,14 @@
 package br.com.guiabolso.hyperloop
 
 import br.com.guiabolso.events.model.Event
+import br.com.guiabolso.hyperloop.cryptography.CryptographyEngine
 import br.com.guiabolso.hyperloop.exceptions.SendMessageException
 import br.com.guiabolso.hyperloop.transport.Transport
 import com.google.gson.GsonBuilder
 
 class Hyperloop(
-        private val transport: Transport
+        private val transport: Transport,
+        private val cryptographyEngine: CryptographyEngine
 ) {
 
     private val validator: Validator = MockValidator()
@@ -17,11 +19,13 @@ class Hyperloop(
 
         event.metadata["origin"] ?: throw IllegalArgumentException("Origin must be present on event metadata")
 
-        val eventString = gson.toJson(event)
+        val encryptedData = cryptographyEngine.encrypt(gson.toJson(event))
 
-        val messageResult = transport.sendMessage(eventString)
+        val encodedEvent = encryptedData.data.b64()
 
-        if (messageResult.messageMD5 != eventString.md5()) {
+        val messageResult = transport.sendMessage(encodedEvent)
+
+        if (messageResult.messageMD5 != encodedEvent.md5()) {
             throw SendMessageException("Transport could not deliver message correctly! MD5 from event differs from MD5 of transport.")
         }
     }

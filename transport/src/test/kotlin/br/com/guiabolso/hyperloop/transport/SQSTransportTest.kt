@@ -1,5 +1,6 @@
 package br.com.guiabolso.hyperloop.transport
 
+import br.com.guiabolso.hyperloop.transport.aws.SQSTransport
 import com.amazonaws.services.sqs.AmazonSQS
 import com.amazonaws.services.sqs.model.SendMessageResult
 import com.nhaarman.mockitokotlin2.any
