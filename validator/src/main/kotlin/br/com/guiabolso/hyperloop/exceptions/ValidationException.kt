@@ -1,3 +1,3 @@
-package br.com.guiabolso.owlbear.exceptions
+package br.com.guiabolso.hyperloop.exceptions
 
 class ValidationException(message: String) : RuntimeException(message)

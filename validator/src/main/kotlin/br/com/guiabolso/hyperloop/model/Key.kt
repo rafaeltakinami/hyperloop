@@ -1,4 +1,4 @@
-package br.com.guiabolso.owlbear.model
+package br.com.guiabolso.hyperloop.model
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
@@ -49,5 +49,6 @@ data class Validation(
 data class Schema(
         val event_name: String,
         val event_version: Int,
+        val types: ObjectNode,
         val validation: ObjectNode
 )

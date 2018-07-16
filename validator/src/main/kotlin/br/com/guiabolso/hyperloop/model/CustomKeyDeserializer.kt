@@ -1,6 +1,6 @@
-package br.com.guiabolso.owlbear.model
+package br.com.guiabolso.hyperloop.model
 
-import br.com.guiabolso.owlbear.exceptions.ValidationException
+import br.com.guiabolso.hyperloop.exceptions.ValidationException
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer
 import com.fasterxml.jackson.databind.DeserializationContext
