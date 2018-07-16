@@ -1,7 +1,4 @@
 dependencies {
-    compile project(":sender")
-
-    testCompile project(':sender').sourceSets.test.output
 }
 
 
