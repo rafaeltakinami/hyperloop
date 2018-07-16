@@ -16,11 +16,9 @@ class Hyperloop(
 
     fun offer(event: Event) {
         validator.validate(event)
-
-        event.metadata["origin"] ?: throw IllegalArgumentException("Origin must be present on event metadata")
-
+      
         val encryptedData = cryptographyEngine.encrypt(gson.toJson(event))
-
+      
         val encodedEvent = encryptedData.data.b64()
 
         val messageResult = transport.sendMessage(encodedEvent)
