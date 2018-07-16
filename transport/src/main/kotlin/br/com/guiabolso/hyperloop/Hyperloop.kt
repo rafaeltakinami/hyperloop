@@ -4,6 +4,8 @@ import br.com.guiabolso.events.model.Event
 import br.com.guiabolso.hyperloop.cryptography.CryptographyEngine
 import br.com.guiabolso.hyperloop.exceptions.SendMessageException
 import br.com.guiabolso.hyperloop.transport.Transport
+import br.com.guiabolso.hyperloop.validation.MockValidator
+import br.com.guiabolso.hyperloop.validation.Validator
 import com.google.gson.GsonBuilder
 
 class Hyperloop(

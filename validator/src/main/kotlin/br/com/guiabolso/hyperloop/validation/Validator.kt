@@ -1,7 +1,7 @@
-package br.com.guiabolso.hyperloop
+package br.com.guiabolso.hyperloop.validation
 
 import br.com.guiabolso.events.model.Event
-import br.com.guiabolso.hyperloop.exceptions.ValidationException
+import br.com.guiabolso.hyperloop.validation.exceptions.ValidationException
 
 interface Validator {
 
