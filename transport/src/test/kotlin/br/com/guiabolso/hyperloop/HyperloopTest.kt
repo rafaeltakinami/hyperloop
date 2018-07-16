@@ -58,14 +58,6 @@ class HyperloopTest {
     }
 
 
-    @Test(expected = IllegalArgumentException::class)
-    fun `test cannot send event without origin`() {
-        event.metadata.remove("origin")
-
-        hyperloop.offer(event)
-    }
-
-
     @Test(expected = SendMessageException::class)
     fun `test send event fails with invalid md5`() {
         whenever(transport.sendMessage(any())).thenReturn(MessageResult("some-id", "wrong-md5-hash"))
