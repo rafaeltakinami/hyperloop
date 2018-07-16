@@ -15,8 +15,6 @@ class Hyperloop(
     fun offer(event: Event) {
         validator.validate(event)
 
-        event.metadata["origin"] ?: throw IllegalArgumentException("Origin must be present on event metadata")
-
         val eventString = gson.toJson(event)
 
         val messageResult = transport.sendMessage(eventString)
