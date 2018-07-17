@@ -24,12 +24,13 @@ class CachedSchemaRepositoryTest {
     }
 
     @Test
-    fun `can retrieve cached value`() {
+    fun `can retrieve cached value when repository is called multiple times`() {
         //Given
         val schemaKey = SchemaKey("some-schema", 1)
         //When
         whenever(mockSchemaRepository.get(any())).thenReturn("some schema value")
         cachedSchemaRepository.get(schemaKey)
+        //redundant call should be cached
         cachedSchemaRepository.get(schemaKey)
         //Then
         verify(mockSchemaRepository, times(1)).get(any())
