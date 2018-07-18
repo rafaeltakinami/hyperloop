@@ -109,7 +109,8 @@ val event = ...
 val sqsTransport = SQSTransport(sqs, "queue-url")
 val hyperloop = Hyperloop(sqsTransport, NoOpCryptographyEngine())
 
-hyperloop.offer(event)
+val result = hyperloop.offer(event)
+println("Message id: ${result.messageId}")
 ```
 
 The Hyperloop class receives to interfaces as parameters, the first is the transport that it will use to send the event
