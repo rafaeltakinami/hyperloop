@@ -4,16 +4,16 @@ import br.com.guiabolso.hyperloop.schemas.exceptions.SchemaFetchingException
 import com.github.benmanes.caffeine.cache.Caffeine
 import java.util.concurrent.TimeUnit
 
-class CachedSchemaRepository(
-        private val schemaRepository: SchemaRepository,
+class CachedSchemaRepository<R>(
+        private val schemaRepository: SchemaRepository<R>,
         maximumCacheSize: Long = 200L,
         expirationInMinutes: Long = 60L
-) : SchemaRepository {
+) : SchemaRepository<R> {
 
     private val schemaCache = Caffeine.newBuilder()
             .maximumSize(maximumCacheSize)
             .expireAfterWrite(expirationInMinutes, TimeUnit.MINUTES)
-            .build<SchemaKey, String> { key ->
+            .build<SchemaKey, R> { key ->
                 retrieveSchema(key)
             }
 

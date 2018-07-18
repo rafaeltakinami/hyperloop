@@ -14,8 +14,8 @@ import org.junit.Test
 
 class CachedSchemaRepositoryTest {
 
-    private lateinit var mockSchemaRepository: SchemaRepository
-    private lateinit var cachedSchemaRepository: CachedSchemaRepository
+    private lateinit var mockSchemaRepository: SchemaRepository<String>
+    private lateinit var cachedSchemaRepository: CachedSchemaRepository<String>
 
     @Before
     fun setUp() {
