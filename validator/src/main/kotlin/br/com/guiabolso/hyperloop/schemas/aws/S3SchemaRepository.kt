@@ -11,7 +11,7 @@ import java.io.BufferedReader
 class S3SchemaRepository(
         private val bucketName: String,
         region: Regions
-) : SchemaRepository {
+) : SchemaRepository<String> {
 
     private val s3Client = AmazonS3ClientBuilder
             .standard()
