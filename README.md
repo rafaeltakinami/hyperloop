@@ -8,7 +8,7 @@ The library is divided in 2 modules: validator and transport
 
 ## Validator
 
-The Validator module contains all the code used to check that a event respects a specified schema. For example the schema
+The Validator module contains all the code used to check that an event respects a specified schema. For example the schema
 and event defined below are a valid representation of the usage of the lib:
 
 ***schema:***
@@ -16,8 +16,9 @@ and event defined below are a valid representation of the usage of the lib:
 schema:
  version: 1
 
-event_name: example:event
-event_version: 1
+event: 
+  name: example:event
+  version: 1
 
 types:
  $File:
