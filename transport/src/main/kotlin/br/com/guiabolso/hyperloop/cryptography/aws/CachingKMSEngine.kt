@@ -22,9 +22,9 @@ class CachingKMSEngine(
             .withMessageUseLimit(kmsConfiguration.keyUsageLimit)
             .build()
 
-    override fun encrypt(string: String): EncryptedData {
-        if (string.isBlank()) return EncryptedData(byteArrayOf())
-        val encryptedData = crypto.encryptData(cache, string.toByteArray()).getResult()
+    override fun encrypt(plainText: String): EncryptedData {
+        if (plainText.isBlank()) return EncryptedData(byteArrayOf())
+        val encryptedData = crypto.encryptData(cache, plainText.toByteArray()).getResult()
         return EncryptedData(encryptedData)
     }
 
