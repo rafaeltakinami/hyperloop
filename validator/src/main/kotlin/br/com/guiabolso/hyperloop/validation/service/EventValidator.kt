@@ -38,9 +38,8 @@ class EventValidator(private val cachedSchemaRepository: CachedSchemaRepository<
         if (schemaData.event.version != event.version)
             throw InvalidInputException("The event version ${event.version} is different from schema")
 
-        //TODO(get schema name)
         val schemaPayloadSpec = schemaData.validation["payload"].fields()
-                ?: throw SchemaWrongFormatException("The schema $schemaData has no payload")
+                ?: throw SchemaWrongFormatException("The schema for '${event.name}_V${event.version}' has no payload")
         val eventPayloadContent = event.payload
         validateAllElements(schemaPayloadSpec, eventPayloadContent, schemaData)
 
