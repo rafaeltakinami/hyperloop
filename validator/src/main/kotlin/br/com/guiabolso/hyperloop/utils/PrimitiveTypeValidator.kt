@@ -1,7 +1,7 @@
 package br.com.guiabolso.hyperloop.utils
 
 import br.com.guiabolso.hyperloop.exceptions.InvalidInputException
-import br.com.guiabolso.hyperloop.exceptions.ValidationException
+import br.com.guiabolso.hyperloop.validation.exceptions.ValidationException
 import com.google.gson.JsonElement
 import com.google.gson.JsonPrimitive
 
