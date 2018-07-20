@@ -6,40 +6,30 @@ event_version: 1
 
 types:
   $File:
-    owner:
-      of: $User
-    name:
-      of: string
-
-  $Origin:
-    origin:
-      of: string
-      is:
-        - required
+      owner:
+        of: $User
+      name:
+        of: string
 
   $User:
     name:
       of: string
       is:
         - required
-        - encripted
+        - encrypted
     birthdate:
       of: date(yyyy/mm/dd)
       is:
         - required
     gender:
       of: string
-
-  $UserId:
-      userId:
-        of: long
-        is:
-          - required
+    id:
+      of: long
+    married:
+      of: boolean
 
 validation:
   payload:
-    users:
-      of: array($User)
     file:
       of: $File
   identity:

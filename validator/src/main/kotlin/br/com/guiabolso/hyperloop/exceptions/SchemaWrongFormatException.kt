@@ -1,3 +1,3 @@
 package br.com.guiabolso.hyperloop.exceptions
 
-class ValidationException(message: String) : RuntimeException(message)
+class SchemaWrongFormatException(message: String) : RuntimeException(message)

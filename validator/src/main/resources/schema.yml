@@ -1,21 +1,20 @@
 schema:
   version: 1
 
-event_name: event_test
-event_version: 1
+event:
+  name: event_test
+  version: 1
 
 types:
   $File:
     owner:
-      of: $User
+      of: array($User)
     name:
       of: string
-
-  $Origin:
-    origin:
-      of: string
-      is:
-        - required
+    size:
+      of: double
+    quantity:
+      of: long
 
   $User:
     name:
@@ -23,28 +22,38 @@ types:
       is:
         - required
         - encripted
+    friend:
+      of: $User
     birthdate:
       of: date(yyyy/mm/dd)
       is:
         - required
     gender:
       of: string
-
-  $UserId:
-      userId:
-        of: long
-        is:
-          - required
+    height:
+      of: float
+    age:
+      of: int
 
 validation:
   payload:
     users:
       of: array($User)
+      is:
+        - required
     file:
       of: $File
+    name:
+      of: string
+      is:
+        - required
   identity:
     userId:
-      of: $UserId
-  metada:
+      of: long
+      is:
+        - required
+  metadata:
     origin:
-      of: $Origin
+        of: string
+        is:
+          - required
