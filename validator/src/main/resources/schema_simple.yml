@@ -1,0 +1,50 @@
+schema:
+  version: 1
+
+event_name: event_test
+event_version: 1
+
+types:
+  $File:
+    owner:
+      of: $User
+    name:
+      of: string
+
+  $Origin:
+    origin:
+      of: string
+      is:
+        - required
+
+  $User:
+    name:
+      of: string
+      is:
+        - required
+        - encripted
+    birthdate:
+      of: date(yyyy/mm/dd)
+      is:
+        - required
+    gender:
+      of: string
+
+  $UserId:
+      userId:
+        of: long
+        is:
+          - required
+
+validation:
+  payload:
+    users:
+      of: array($User)
+    file:
+      of: $File
+  identity:
+    userId:
+      of: $UserId
+  metada:
+    origin:
+      of: $Origin
