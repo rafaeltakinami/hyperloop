@@ -2,6 +2,7 @@ package br.com.guiabolso.hyperloop
 
 import br.com.guiabolso.events.builder.EventBuilder
 import br.com.guiabolso.events.model.RequestEvent
+import br.com.guiabolso.hyperloop.cryptography.cypher.MessageCypher
 import br.com.guiabolso.hyperloop.exceptions.SendMessageException
 import br.com.guiabolso.hyperloop.transport.MessageResult
 import br.com.guiabolso.hyperloop.transport.Transport
@@ -19,6 +20,7 @@ class HyperloopTest {
 
     private lateinit var hyperloop: Hyperloop
     private lateinit var transport: Transport
+    private lateinit var cryptographyEngine: MessageCypher
     private lateinit var event: RequestEvent
     private lateinit var eventMD5: String
     private val gson = Gson()
@@ -26,7 +28,8 @@ class HyperloopTest {
     @Before
     fun setUp() {
         transport = mock()
-        hyperloop = Hyperloop(transport)
+        cryptographyEngine = mock()
+        hyperloop = Hyperloop(transport, cryptographyEngine)
 
         event = EventBuilder.event {
             name = "test:event"
@@ -44,6 +47,9 @@ class HyperloopTest {
     @Test
     fun `test can send event as message`() {
         whenever(transport.sendMessage(any())).thenReturn(MessageResult("some-id", eventMD5))
+        whenever(cryptographyEngine.cypher(any())).thenAnswer {
+            it.arguments[0] as String
+        }
 
         hyperloop.offer(event)
 
@@ -51,17 +57,12 @@ class HyperloopTest {
     }
 
 
-    @Test(expected = IllegalArgumentException::class)
-    fun `test cannot send event without origin`() {
-        event.metadata.remove("origin")
-
-        hyperloop.offer(event)
-    }
-
-
     @Test(expected = SendMessageException::class)
     fun `test send event fails with invalid md5`() {
         whenever(transport.sendMessage(any())).thenReturn(MessageResult("some-id", "wrong-md5-hash"))
+        whenever(cryptographyEngine.cypher(any())).thenAnswer {
+            it.arguments[0] as String
+        }
 
         hyperloop.offer(event)
     }
