@@ -1,6 +1,6 @@
 #!/bin/bash
 
-modules=("sender" "validator")
+modules=("transport" "validator")
 
 for i in "${modules[@]}"
 do
