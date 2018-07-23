@@ -23,37 +23,37 @@ import kotlin.collections.MutableMap.MutableEntry
 
 typealias InputSchemaSpec = MutableIterator<MutableEntry<String, JsonNode>>
 
-@JsonIgnoreProperties(ignoreUnknown = true)
 class EventValidator(
         private val cachedSchemaRepository: CachedSchemaRepository<SchemaData>
 ) : Validator {
 
     override fun validate(event: Event) {
-        val schemaData = cachedSchemaRepository.get(SchemaKey(event.name, event.version))
+        val schemaKey = SchemaKey(event.name, event.version)
+        val schemaData = cachedSchemaRepository.get(schemaKey)
 
         if (schemaData.event.name != event.name)
             throw InvalidInputException("The event name ${event.name} is different from schema")
         if (schemaData.event.version != event.version)
             throw InvalidInputException("The event version ${event.version} is different from schema")
 
-        val schemaPayloadSpec = schemaData.validation["payload"].fields()
-                ?: throw WrongSchemaFormatException("The schema for '${event.name}_V${event.version}' has no payload")
+        val schemaPayloadSpec = schemaData.validation["payload"]?.fields()
+                ?: throw WrongSchemaFormatException("The schema for '$schemaKey' has no payload")
         val eventPayloadContent = event.payload
         validateAllElements(schemaPayloadSpec, eventPayloadContent, schemaData)
 
-        val schemaIdentitySpec = schemaData.validation["identity"].fields()
-                ?: throw WrongSchemaFormatException("The schema $schemaData has no identity")
-        val eventIdentityContent = event.identity
-        eventIdentityContent.asJsonObject["userId"]
-                ?: throw ValidationException("The event ${event.name} has no userId")
-        validateAllElements(schemaIdentitySpec, eventIdentityContent, schemaData)
+        schemaData.validation["identity"]?.fields()?.let {schemaIdentitySpec ->
+            val eventIdentityContent = event.identity
+            eventIdentityContent.asJsonObject["userId"]
+                    ?: throw ValidationException("The event ${event.name} has no userId")
+            validateAllElements(schemaIdentitySpec, eventIdentityContent, schemaData)
+        }
 
-        val schemaMetadataSpec = schemaData.validation["metadata"].fields()
-                ?: throw WrongSchemaFormatException("The schema $schemaData has no metadata")
-        val eventMetadataContent = event.metadata
-        eventMetadataContent.asJsonObject["origin"]
-                ?: throw ValidationException("The event ${event.name} has no origin")
-        validateAllElements(schemaMetadataSpec, eventMetadataContent, schemaData)
+        schemaData.validation["metadata"]?.fields()?.let {schemaMetadataSpec ->
+            val eventMetadataContent = event.metadata
+            eventMetadataContent.asJsonObject["origin"]
+                    ?: throw ValidationException("The event ${event.name} has no origin")
+            validateAllElements(schemaMetadataSpec, eventMetadataContent, schemaData)
+        }
     }
 
     private fun validateAllElements(
