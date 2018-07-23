@@ -1,6 +1,5 @@
 package br.com.guiabolso.hyperloop.validation.types
 
-import br.com.guiabolso.hyperloop.exceptions.InvalidInputException
 import br.com.guiabolso.hyperloop.exceptions.WrongSchemaFormatException
 import br.com.guiabolso.hyperloop.model.SchemaData
 import com.fasterxml.jackson.databind.JsonNode
@@ -11,30 +10,31 @@ object SchemaNodeTypeParser {
 
     fun getSchemaNodeType(schema: SchemaData, nodeKey: String, specNode: JsonNode): SchemaType {
         val rawType = specNode.get("of")?.asText() ?: throw WrongSchemaFormatException("Missing type for key $nodeKey")
-        val groups = typeRegex.find(rawType)!!.groupValues //TODO: validar null
+        val groups = typeRegex.find(rawType)?.groupValues
+                ?: throw WrongSchemaFormatException("Illegal type $rawType. $rawType is neither primitive, array, date nor user defined")
         val type = groups[1]
-        val param = if (groups.size > 1) {
-            groups.last()
-        } else null
+        val attribute = if (groups.size > 1) {
+                            groups.last()
+                        } else null
         return when (type.toLowerCase()) {
             "string", "long", "int", "float", "double", "boolean" -> PrimitiveType(nodeKey, type)
             "array" -> {
-                val arrayContentType = when (param) {
+                val arrayContentType = when (attribute) {
                     "string", "long", "int", "float", "double", "boolean" -> PrimitiveType(nodeKey, type)
-                    "date" -> DateType(nodeKey, param)
-                    else -> if (isUserDefinedType(param.notNull("Array content type should not be null"), schema)) {
-                        UserDefinedType(nodeKey, schema.types.get(param))
+                    "date" -> DateType(nodeKey, attribute)
+                    else -> if (isUserDefinedType(attribute.notNull("Array content type should not be null"), schema)) {
+                        UserDefinedType(nodeKey, schema.types.get(attribute))
                     } else {
-                        throw InvalidInputException("Illegal type $type. $type is neither primitive, array, date nor user defined")
+                        throw WrongSchemaFormatException("Illegal type $type. $type is neither primitive, array, date nor user defined")
                     }
                 }
                 ArrayType(nodeKey, arrayContentType)
             }
-            "date" -> DateType(nodeKey, param.notNull("Date type should have one parameter"))
+            "date" -> DateType(nodeKey, attribute.notNull("Date type should have one parameter"))
             else -> if (isUserDefinedType(type, schema)) {
                 UserDefinedType(nodeKey, schema.types.get(type))
             } else {
-                throw InvalidInputException("Illegal type $type. $type is neither primitive, array, date nor user defined")
+                throw WrongSchemaFormatException("Illegal type $type. $type is neither primitive, array, date nor user defined")
             }
         }
     }
