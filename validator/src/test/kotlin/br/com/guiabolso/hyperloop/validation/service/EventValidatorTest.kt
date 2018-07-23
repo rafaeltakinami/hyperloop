@@ -5,12 +5,9 @@ import br.com.guiabolso.events.model.RequestEvent
 import br.com.guiabolso.hyperloop.exceptions.InvalidInputException
 import br.com.guiabolso.hyperloop.model.SchemaData
 import br.com.guiabolso.hyperloop.schemas.CachedSchemaRepository
-import br.com.guiabolso.hyperloop.schemas.SchemaDataRepository
 import br.com.guiabolso.hyperloop.schemas.SchemaKey
 import br.com.guiabolso.hyperloop.schemas.SchemaRepository
-import br.com.guiabolso.hyperloop.schemas.aws.S3SchemaRepository
-import com.amazonaws.regions.Regions
-import com.amazonaws.services.s3.model.Region
+import br.com.guiabolso.hyperloop.validation.EventValidator
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
@@ -135,7 +132,7 @@ class EventValidatorTest {
         eventValidator.validate(newEvent("event_test", 3, ""))
     }
 
-    fun newEvent(eventName: String, eventVersion: Int, payload: String): Event {
+    private fun newEvent(eventName: String, eventVersion: Int, payload: String): Event {
         val identity = JsonObject()
         identity.addProperty("userId", 1)
 

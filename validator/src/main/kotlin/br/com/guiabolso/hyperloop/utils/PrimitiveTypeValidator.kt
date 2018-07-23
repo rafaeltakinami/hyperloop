@@ -35,18 +35,3 @@ fun JsonElement.verifyDouble() {
         throw InvalidInputException("Input $this is not a double")
     }
 }
-
-fun JsonElement.verifyLong() {
-    try {
-        this.asString.toLong()
-    } catch (exception: Exception) {
-        throw InvalidInputException("Input $this is not a long")
-    }
-}
-
-fun JsonElement.verifyString() {
-    val input = this as JsonPrimitive
-    if (!input.isString) {
-        throw ValidationException("Input $input is not a string")
-    }
-}

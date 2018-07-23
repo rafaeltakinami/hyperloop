@@ -1,4 +1,4 @@
-package br.com.guiabolso.hyperloop.validation.service
+package br.com.guiabolso.hyperloop.validation
 
 import br.com.guiabolso.events.model.Event
 import br.com.guiabolso.hyperloop.exceptions.InvalidInputException
@@ -6,14 +6,13 @@ import br.com.guiabolso.hyperloop.exceptions.SchemaWrongFormatException
 import br.com.guiabolso.hyperloop.model.SchemaData
 import br.com.guiabolso.hyperloop.schemas.CachedSchemaRepository
 import br.com.guiabolso.hyperloop.schemas.SchemaKey
-import br.com.guiabolso.hyperloop.utils.verifyBoolean
-import br.com.guiabolso.hyperloop.utils.verifyDouble
-import br.com.guiabolso.hyperloop.utils.verifyFloat
-import br.com.guiabolso.hyperloop.utils.verifyInt
-import br.com.guiabolso.hyperloop.utils.verifyLong
-import br.com.guiabolso.hyperloop.utils.verifyString
-import br.com.guiabolso.hyperloop.validation.Validator
 import br.com.guiabolso.hyperloop.validation.exceptions.ValidationException
+import br.com.guiabolso.hyperloop.validation.types.ArrayType
+import br.com.guiabolso.hyperloop.validation.types.DateType
+import br.com.guiabolso.hyperloop.validation.types.PrimitiveType
+import br.com.guiabolso.hyperloop.validation.types.SchemaNodeTypeParser
+import br.com.guiabolso.hyperloop.validation.types.SchemaType
+import br.com.guiabolso.hyperloop.validation.types.UserDefinedType
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.TextNode
@@ -25,10 +24,9 @@ import kotlin.collections.MutableMap.MutableEntry
 typealias InputSchemaSpec = MutableIterator<MutableEntry<String, JsonNode>>
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-class EventValidator(private val cachedSchemaRepository: CachedSchemaRepository<SchemaData>) : Validator {
-
-    private val dateTypeRegex = "^(date)(\\((.*)\\))?".toRegex(RegexOption.IGNORE_CASE)
-    private val arrayTypeRegex = "^(array)(\\((.*)\\))?".toRegex(RegexOption.IGNORE_CASE)
+class EventValidator(
+        private val cachedSchemaRepository: CachedSchemaRepository<SchemaData>
+) : Validator {
 
     override fun validate(event: Event) {
         val schemaData = cachedSchemaRepository.get(SchemaKey(event.name, event.version))
@@ -65,26 +63,26 @@ class EventValidator(private val cachedSchemaRepository: CachedSchemaRepository<
     ) {
         schemaPayloadSpec.forEach { (key, node) ->
             val eventPayloadNode = eventPayloadContent.asJsonObject[key]
-            val expectedType = getSchemaNodeType(node)?.asText()
-                    ?: throw SchemaWrongFormatException("The schema has a null type for element $key")
+            val expectedType = SchemaNodeTypeParser.getSchemaNodeType(schemaData, key, node)
+
             this.validateRequiredElement(key, node, eventPayloadNode)
+
             eventPayloadNode?.let { this.validateByType(expectedType, eventPayloadNode, schemaData) }
         }
     }
 
     private fun validateByType(
-            type: String,
+            type: SchemaType,
             inputNode: JsonElement,
             schemaData: SchemaData) {
-        when {
-            isArrayType(type) -> this.validateArrayElement(type, inputNode, schemaData)
-            isDateType(type) -> this.validateDateElement(type, inputNode)
-            isUserDefinedType(type, schemaData) -> {
-                val currentTypeSpec = schemaData.types.get(type)?.fields()
-                        ?: throw SchemaWrongFormatException("The schema has an empty user defined type")
+        when (type) {
+            is ArrayType -> this.validateArrayElement(type, inputNode, schemaData)
+            is DateType -> this.validateDateElement(type, inputNode)
+            is UserDefinedType -> {
+                val currentTypeSpec = type.userType.fields()
                 validateAllElements(currentTypeSpec, inputNode, schemaData)
             }
-            else -> this.validatePrimitiveElement(type, inputNode)
+            is PrimitiveType -> type.type.verifyType(inputNode.asJsonPrimitive)
         }
     }
 
@@ -103,59 +101,28 @@ class EventValidator(private val cachedSchemaRepository: CachedSchemaRepository<
     }
 
     private fun validateArrayElement(
-            type: String,
+            type: ArrayType,
             arrayElement: JsonElement,
             schemaData: SchemaData
     ) {
-        val arrayTypeSpec = arrayTypeRegex.find(type)?.groups?.last()?.value
-                ?: throw InvalidInputException("Array element $type has no content type.")
-        if (arrayElement.isJsonArray) {
-            arrayElement.asJsonArray.forEach {
-                validateByType(arrayTypeSpec, it, schemaData)
-            }
-        } else throw InvalidInputException("Array element $type is in the wrong format.")
-    }
-
-    private fun validateDateElement(type: String, dateElement: JsonElement) {
-        val schemaDateFormat = dateTypeRegex.find(type)?.groups?.last()?.value
-                ?: throw InvalidInputException("Date element has no format.")
-        val simpleDateFormat = SimpleDateFormat(schemaDateFormat)
-        try {
-            simpleDateFormat.parse(dateElement.asString)
-        } catch (e: ParseException) {
-            throw InvalidInputException("Date Element ${dateElement.asString} is not in the format '$schemaDateFormat'.")
+        if (!arrayElement.isJsonArray) {
+            throw InvalidInputException("Array element ${type.nodeKey} is in the wrong format.")
+        }
+        arrayElement.asJsonArray.forEach {
+            validateByType(type.contentType, it, schemaData)
         }
     }
 
-    private fun validatePrimitiveElement(type: String, primitiveElement: JsonElement) {
-        when (type.toUpperCase().trim()) {
-            "STRING" -> primitiveElement.verifyString()
-            "LONG" -> primitiveElement.verifyLong()
-            "INT" -> primitiveElement.verifyInt()
-            "FLOAT" -> primitiveElement.verifyFloat()
-            "DOUBLE" -> primitiveElement.verifyDouble()
-            "BOOLEAN" -> primitiveElement.verifyBoolean()
-            else -> throw ValidationException("Invalid schema primitive type: $String")
+    private fun validateDateElement(type: DateType, dateElement: JsonElement) {
+        val simpleDateFormat = SimpleDateFormat(type.format)
+        try {
+            simpleDateFormat.parse(dateElement.asString)
+        } catch (e: ParseException) {
+            throw InvalidInputException("Date Element ${dateElement.asString} is not in the format '${type.format}'.")
         }
     }
 
     private fun getSchemaNodeAttributes(specNode: JsonNode): JsonNode? {
         return specNode.get("is")
-    }
-
-    private fun getSchemaNodeType(specNode: JsonNode): JsonNode? {
-        return specNode.get("of")
-    }
-
-    private fun isArrayType(type: String): Boolean {
-        return arrayTypeRegex.matches(type)
-    }
-
-    private fun isDateType(type: String): Boolean {
-        return dateTypeRegex.matches(type)
-    }
-
-    private fun isUserDefinedType(type: String, schema: SchemaData): Boolean {
-        return schema.types.get(type) != null
     }
 }
