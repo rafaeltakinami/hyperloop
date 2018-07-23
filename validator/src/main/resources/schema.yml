@@ -1,40 +1,59 @@
 schema:
   version: 1
 
-event_name: event_test
-event_version: 1
+event:
+  name: event_test
+  version: 1
+
+types:
+  $File:
+    owner:
+      of: array($User)
+    name:
+      of: string
+    size:
+      of: double
+    quantity:
+      of: long
+
+  $User:
+    name:
+      of: string
+      is:
+        - required
+        - encripted
+    friend:
+      of: $User
+    birthdate:
+      of: date(yyyy/mm/dd)
+      is:
+        - required
+    gender:
+      of: string
+    height:
+      of: float
+    age:
+      of: int
 
 validation:
   payload:
-    key1:
-      type: string
-      required: true
-      encrypted: true
-    key2:
-      type: string
-      required: true
-      encrypted: false
-    date_key:
-      type: date
-      format: YYYY/MM/DD - HH-mm-SS
-      required: true
-      encrypted: false
+    users:
+      of: array($User)
+      is:
+        - required
+    file:
+      of: $File
+    name:
+      of: string
+      is:
+        - required
   identity:
     userId:
-      type: long
-      required: true
+      of: long
+      is:
+        - required
   metadata:
     origin:
-      type: string
-      required: true
-
-
-transform:
-  hub_xpto:
-    key1: $.payload.key1
-    created: $.payload.date_key
-  satelite_abc:
-    user_id: $.identity.userId
-    origin: $.metadata.origin
-  satelite_def:
-    key2: $.payload.key2
+        of: string
+        is:
+          - required

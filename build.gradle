@@ -42,6 +42,10 @@ subprojects {
 
         compile 'br.com.guiabolso:events-core:1.1.0'
 
+        compile 'com.fasterxml.jackson.core:jackson-databind:2.9.6'
+        compile 'com.fasterxml.jackson.module:jackson-module-kotlin:2.9.6'
+        compile 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.9.6'
+
         compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
 
         testCompile group: 'junit', name: 'junit', version: '4.+'
