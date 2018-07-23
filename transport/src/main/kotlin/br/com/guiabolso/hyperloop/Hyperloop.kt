@@ -9,7 +9,9 @@ import br.com.guiabolso.hyperloop.transport.Transport
 import br.com.guiabolso.hyperloop.validation.Validator
 import com.google.gson.GsonBuilder
 
-class Hyperloop(
+class Hyperloop
+@JvmOverloads
+constructor(
         private val transport: Transport,
         private val validator: Validator,
         private val messageCypher: MessageCypher = NoOpMessageCypher

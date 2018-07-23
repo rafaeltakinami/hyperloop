@@ -4,7 +4,9 @@ import br.com.guiabolso.hyperloop.schemas.exceptions.SchemaFetchingException
 import com.github.benmanes.caffeine.cache.Caffeine
 import java.util.concurrent.TimeUnit
 
-class CachedSchemaRepository<R>(
+class CachedSchemaRepository<R>
+@JvmOverloads
+constructor(
         private val schemaRepository: SchemaRepository<R>,
         maximumCacheSize: Long = 200L,
         expirationInMinutes: Long = 60L
