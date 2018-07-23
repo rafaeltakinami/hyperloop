@@ -1,7 +1,7 @@
 package br.com.guiabolso.hyperloop.validation.types
 
 import br.com.guiabolso.hyperloop.exceptions.InvalidInputException
-import br.com.guiabolso.hyperloop.exceptions.SchemaWrongFormatException
+import br.com.guiabolso.hyperloop.exceptions.WrongSchemaFormatException
 import br.com.guiabolso.hyperloop.model.SchemaData
 import com.fasterxml.jackson.databind.JsonNode
 
@@ -10,7 +10,7 @@ object SchemaNodeTypeParser {
     private val typeRegex = "^(\\\$?\\w+)(\\((.+)\\))?".toRegex(RegexOption.IGNORE_CASE)
 
     fun getSchemaNodeType(schema: SchemaData, nodeKey: String, specNode: JsonNode): SchemaType {
-        val rawType = specNode.get("of")?.asText() ?: throw SchemaWrongFormatException("Missing type for key $nodeKey")
+        val rawType = specNode.get("of")?.asText() ?: throw WrongSchemaFormatException("Missing type for key $nodeKey")
         val groups = typeRegex.find(rawType)!!.groupValues //TODO: validar null
         val type = groups[1]
         val param = if (groups.size > 1) {
@@ -43,5 +43,5 @@ object SchemaNodeTypeParser {
         return schema.types.get(type) != null
     }
 
-    private fun String?.notNull(message: String) = this ?: throw SchemaWrongFormatException(message)
+    private fun String?.notNull(message: String) = this ?: throw WrongSchemaFormatException(message)
 }

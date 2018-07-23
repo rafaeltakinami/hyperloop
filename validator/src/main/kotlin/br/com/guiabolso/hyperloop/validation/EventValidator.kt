@@ -2,7 +2,7 @@ package br.com.guiabolso.hyperloop.validation
 
 import br.com.guiabolso.events.model.Event
 import br.com.guiabolso.hyperloop.exceptions.InvalidInputException
-import br.com.guiabolso.hyperloop.exceptions.SchemaWrongFormatException
+import br.com.guiabolso.hyperloop.exceptions.WrongSchemaFormatException
 import br.com.guiabolso.hyperloop.model.SchemaData
 import br.com.guiabolso.hyperloop.schemas.CachedSchemaRepository
 import br.com.guiabolso.hyperloop.schemas.SchemaKey
@@ -37,19 +37,19 @@ class EventValidator(
             throw InvalidInputException("The event version ${event.version} is different from schema")
 
         val schemaPayloadSpec = schemaData.validation["payload"].fields()
-                ?: throw SchemaWrongFormatException("The schema for '${event.name}_V${event.version}' has no payload")
+                ?: throw WrongSchemaFormatException("The schema for '${event.name}_V${event.version}' has no payload")
         val eventPayloadContent = event.payload
         validateAllElements(schemaPayloadSpec, eventPayloadContent, schemaData)
 
         val schemaIdentitySpec = schemaData.validation["identity"].fields()
-                ?: throw SchemaWrongFormatException("The schema $schemaData has no identity")
+                ?: throw WrongSchemaFormatException("The schema $schemaData has no identity")
         val eventIdentityContent = event.identity
         eventIdentityContent.asJsonObject["userId"]
                 ?: throw ValidationException("The event ${event.name} has no userId")
         validateAllElements(schemaIdentitySpec, eventIdentityContent, schemaData)
 
         val schemaMetadataSpec = schemaData.validation["metadata"].fields()
-                ?: throw SchemaWrongFormatException("The schema $schemaData has no metadata")
+                ?: throw WrongSchemaFormatException("The schema $schemaData has no metadata")
         val eventMetadataContent = event.metadata
         eventMetadataContent.asJsonObject["origin"]
                 ?: throw ValidationException("The event ${event.name} has no origin")
