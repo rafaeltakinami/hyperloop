@@ -7,12 +7,12 @@ dependencies {
 apply plugin: 'com.novoda.bintray-release'
 
 publish {
-    artifactId = 'owlbear-validator'
+    artifactId = 'hyperloop-validator'
     autoPublish = true
-    desc = 'Validator classes for owlbear'
+    desc = 'Validator classes for hyperloop'
     groupId = 'br.com.guiabolso'
     licences = ['APACHE-2.0']
     publishVersion = parent.ext.publish_version
-    uploadName = 'Owlbear-Validator'
-    website = 'https://github.com/GuiaBolso/owlbear'
+    uploadName = 'Hyperloop-Validator'
+    website = 'https://github.com/GuiaBolso/hyperloop'
 }

@@ -10,12 +10,12 @@ dependencies {
 apply plugin: 'com.novoda.bintray-release'
 
 publish {
-    artifactId = 'owlbear-sender'
+    artifactId = 'hyperloop-transport'
     autoPublish = true
-    desc = 'Sender classes for owlbear'
+    desc = 'Transport classes for hyperloop'
     groupId = 'br.com.guiabolso'
     licences = ['APACHE-2.0']
     publishVersion = parent.ext.publish_version
-    uploadName = 'Owlbear-Sender'
-    website = 'https://github.com/GuiaBolso/owlbear'
+    uploadName = 'Hyperloop-Sender'
+    website = 'https://github.com/GuiaBolso/hyperloop'
 }
