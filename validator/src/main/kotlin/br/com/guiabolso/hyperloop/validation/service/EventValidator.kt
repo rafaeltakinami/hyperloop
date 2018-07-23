@@ -1,10 +1,8 @@
 package br.com.guiabolso.hyperloop.validation.service
 
 import br.com.guiabolso.events.model.Event
-import br.com.guiabolso.hyperloop.validation.Validator
 import br.com.guiabolso.hyperloop.exceptions.InvalidInputException
 import br.com.guiabolso.hyperloop.exceptions.SchemaWrongFormatException
-import br.com.guiabolso.hyperloop.validation.exceptions.ValidationException
 import br.com.guiabolso.hyperloop.model.SchemaData
 import br.com.guiabolso.hyperloop.schemas.CachedSchemaRepository
 import br.com.guiabolso.hyperloop.schemas.SchemaKey
@@ -14,6 +12,8 @@ import br.com.guiabolso.hyperloop.utils.verifyFloat
 import br.com.guiabolso.hyperloop.utils.verifyInt
 import br.com.guiabolso.hyperloop.utils.verifyLong
 import br.com.guiabolso.hyperloop.utils.verifyString
+import br.com.guiabolso.hyperloop.validation.Validator
+import br.com.guiabolso.hyperloop.validation.exceptions.ValidationException
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.TextNode
@@ -46,13 +46,15 @@ class EventValidator(private val cachedSchemaRepository: CachedSchemaRepository<
         val schemaIdentitySpec = schemaData.validation["identity"].fields()
                 ?: throw SchemaWrongFormatException("The schema $schemaData has no identity")
         val eventIdentityContent = event.identity
-        eventIdentityContent.asJsonObject["userId"] ?: throw ValidationException("The event ${event.name} has no userId")
+        eventIdentityContent.asJsonObject["userId"]
+                ?: throw ValidationException("The event ${event.name} has no userId")
         validateAllElements(schemaIdentitySpec, eventIdentityContent, schemaData)
 
         val schemaMetadataSpec = schemaData.validation["metadata"].fields()
                 ?: throw SchemaWrongFormatException("The schema $schemaData has no metadata")
         val eventMetadataContent = event.metadata
-        eventMetadataContent.asJsonObject["origin"] ?: throw ValidationException("The event ${event.name} has no origin")
+        eventMetadataContent.asJsonObject["origin"]
+                ?: throw ValidationException("The event ${event.name} has no origin")
         validateAllElements(schemaMetadataSpec, eventMetadataContent, schemaData)
     }
 
@@ -61,11 +63,11 @@ class EventValidator(private val cachedSchemaRepository: CachedSchemaRepository<
             eventPayloadContent: JsonElement,
             schemaData: SchemaData
     ) {
-        schemaPayloadSpec.forEach { entry ->
-            val eventPayloadNode = eventPayloadContent.asJsonObject[entry.key]
-            val expectedType = getSchemaNodeType(entry)?.asText()
-                    ?: throw SchemaWrongFormatException("The schema has a null type for element ${entry.key}")
-            this.validateRequiredElement(entry, eventPayloadNode)
+        schemaPayloadSpec.forEach { (key, node) ->
+            val eventPayloadNode = eventPayloadContent.asJsonObject[key]
+            val expectedType = getSchemaNodeType(node)?.asText()
+                    ?: throw SchemaWrongFormatException("The schema has a null type for element $key")
+            this.validateRequiredElement(key, node, eventPayloadNode)
             eventPayloadNode?.let { this.validateByType(expectedType, eventPayloadNode, schemaData) }
         }
     }
@@ -87,14 +89,15 @@ class EventValidator(private val cachedSchemaRepository: CachedSchemaRepository<
     }
 
     private fun validateRequiredElement(
-            specNode: MutableEntry<String, JsonNode>,
+            nodeKey: String,
+            specNode: JsonNode,
             inputElement: JsonElement?
     ) {
         if (isRequired(specNode) && (inputElement == null || inputElement.isJsonNull))
-            throw InvalidInputException("Element '${specNode.key}' is required.")
+            throw InvalidInputException("Element '$nodeKey' is required.")
     }
 
-    private fun isRequired(specNode: MutableEntry<String, JsonNode>): Boolean {
+    private fun isRequired(specNode: JsonNode): Boolean {
         val schemaNodeAttributes = getSchemaNodeAttributes(specNode) ?: return false
         return TextNode("required") in schemaNodeAttributes
     }
@@ -136,12 +139,12 @@ class EventValidator(private val cachedSchemaRepository: CachedSchemaRepository<
         }
     }
 
-    private fun getSchemaNodeAttributes(specNode: MutableEntry<String, JsonNode>): JsonNode? {
-        return specNode.value.get("is")
+    private fun getSchemaNodeAttributes(specNode: JsonNode): JsonNode? {
+        return specNode.get("is")
     }
 
-    private fun getSchemaNodeType(specNode: MutableEntry<String, JsonNode>): JsonNode? {
-        return specNode.value.get("of")
+    private fun getSchemaNodeType(specNode: JsonNode): JsonNode? {
+        return specNode.get("of")
     }
 
     private fun isArrayType(type: String): Boolean {
