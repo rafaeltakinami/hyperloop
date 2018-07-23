@@ -14,8 +14,8 @@ object SchemaNodeTypeParser {
                 ?: throw WrongSchemaFormatException("Illegal type $rawType. $rawType is neither primitive, array, date nor user defined")
         val type = groups[1]
         val attribute = if (groups.size > 1) {
-                            groups.last()
-                        } else null
+            groups.last()
+        } else null
         return when (type.toLowerCase()) {
             "string", "long", "int", "float", "double", "boolean" -> PrimitiveType(nodeKey, type)
             "array" -> {

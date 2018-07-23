@@ -13,7 +13,6 @@ import br.com.guiabolso.hyperloop.validation.types.PrimitiveType
 import br.com.guiabolso.hyperloop.validation.types.SchemaNodeTypeParser
 import br.com.guiabolso.hyperloop.validation.types.SchemaType
 import br.com.guiabolso.hyperloop.validation.types.UserDefinedType
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.TextNode
 import com.google.gson.JsonElement
@@ -41,14 +40,14 @@ class EventValidator(
         val eventPayloadContent = event.payload
         validateAllElements(schemaPayloadSpec, eventPayloadContent, schemaData)
 
-        schemaData.validation["identity"]?.fields()?.let {schemaIdentitySpec ->
+        schemaData.validation["identity"]?.fields()?.let { schemaIdentitySpec ->
             val eventIdentityContent = event.identity
             eventIdentityContent.asJsonObject["userId"]
                     ?: throw ValidationException("The event ${event.name} has no userId")
             validateAllElements(schemaIdentitySpec, eventIdentityContent, schemaData)
         }
 
-        schemaData.validation["metadata"]?.fields()?.let {schemaMetadataSpec ->
+        schemaData.validation["metadata"]?.fields()?.let { schemaMetadataSpec ->
             val eventMetadataContent = event.metadata
             eventMetadataContent.asJsonObject["origin"]
                     ?: throw ValidationException("The event ${event.name} has no origin")
