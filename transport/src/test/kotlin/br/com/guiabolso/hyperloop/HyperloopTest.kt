@@ -6,6 +6,7 @@ import br.com.guiabolso.hyperloop.cryptography.cypher.MessageCypher
 import br.com.guiabolso.hyperloop.exceptions.SendMessageException
 import br.com.guiabolso.hyperloop.transport.MessageResult
 import br.com.guiabolso.hyperloop.transport.Transport
+import br.com.guiabolso.hyperloop.validation.Validator
 import com.github.salomonbrys.kotson.jsonObject
 import com.google.gson.Gson
 import com.nhaarman.mockitokotlin2.any
@@ -20,6 +21,7 @@ class HyperloopTest {
 
     private lateinit var hyperloop: Hyperloop
     private lateinit var transport: Transport
+    private lateinit var validator: Validator
     private lateinit var cryptographyEngine: MessageCypher
     private lateinit var event: RequestEvent
     private lateinit var eventMD5: String
@@ -29,7 +31,8 @@ class HyperloopTest {
     fun setUp() {
         transport = mock()
         cryptographyEngine = mock()
-        hyperloop = Hyperloop(transport, cryptographyEngine)
+        validator = mock()
+        hyperloop = Hyperloop(transport, validator, cryptographyEngine)
 
         event = EventBuilder.event {
             name = "test:event"

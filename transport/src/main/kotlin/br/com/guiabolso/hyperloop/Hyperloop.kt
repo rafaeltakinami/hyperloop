@@ -2,19 +2,19 @@ package br.com.guiabolso.hyperloop
 
 import br.com.guiabolso.events.model.Event
 import br.com.guiabolso.hyperloop.cryptography.cypher.MessageCypher
+import br.com.guiabolso.hyperloop.cryptography.cypher.NoOpMessageCypher
 import br.com.guiabolso.hyperloop.exceptions.SendMessageException
 import br.com.guiabolso.hyperloop.transport.MessageResult
 import br.com.guiabolso.hyperloop.transport.Transport
-import br.com.guiabolso.hyperloop.validation.MockValidator
 import br.com.guiabolso.hyperloop.validation.Validator
 import com.google.gson.GsonBuilder
 
 class Hyperloop(
         private val transport: Transport,
-        private val messageCypher: MessageCypher
+        private val validator: Validator,
+        private val messageCypher: MessageCypher = NoOpMessageCypher
 ) {
 
-    private val validator: Validator = MockValidator()
     private val gson = GsonBuilder().serializeNulls().create()
 
     fun offer(event: Event): MessageResult {
