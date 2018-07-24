@@ -1,6 +1,8 @@
 # hyperloop
 
 [![Build Status](https://travis-ci.org/GuiaBolso/hyperloop.svg?branch=master)](https://travis-ci.org/GuiaBolso/hyperloop)
+[ ![Download](https://api.bintray.com/packages/gb-opensource/maven/Hyperloop-Transport/images/download.svg) ](https://bintray.com/gb-opensource/maven/Hyperloop-Transport/_latestVersion)
+
 
 Hyperloop is a simple library used to validate and send [events](https://github.com/GuiaBolso/events-protocol) to a specified destination.
 
