@@ -1,12 +1,11 @@
 package br.com.guiabolso.hyperloop.validation
 
-import br.com.guiabolso.events.model.Event
+import br.com.guiabolso.events.model.RequestEvent
 import br.com.guiabolso.hyperloop.exceptions.InvalidInputException
 import br.com.guiabolso.hyperloop.exceptions.WrongSchemaFormatException
 import br.com.guiabolso.hyperloop.model.SchemaData
 import br.com.guiabolso.hyperloop.schemas.CachedSchemaRepository
 import br.com.guiabolso.hyperloop.schemas.SchemaKey
-import br.com.guiabolso.hyperloop.validation.exceptions.ValidationException
 import br.com.guiabolso.hyperloop.validation.types.ArrayType
 import br.com.guiabolso.hyperloop.validation.types.DateType
 import br.com.guiabolso.hyperloop.validation.types.PrimitiveType
@@ -25,34 +24,44 @@ typealias InputSchemaSpec = MutableIterator<MutableEntry<String, JsonNode>>
 class EventValidator(
         private val cachedSchemaRepository: CachedSchemaRepository<SchemaData>
 ) : Validator {
+    private var validationSuccess = false
+    private val validationErrors = mutableListOf<Throwable>()
+    private val encryptedFields = mutableListOf<String>()
 
-    override fun validate(event: Event) {
+
+    override fun validate(event: RequestEvent): ValidationResult {
         val schemaKey = SchemaKey(event.name, event.version)
         val schemaData = cachedSchemaRepository.get(schemaKey)
 
         if (schemaData.event.name != event.name)
-            throw InvalidInputException("The event name ${event.name} is different from schema")
+            validationErrors.add(InvalidInputException("The event name '${event.name}' is different from schema '${schemaData.event.name}'"))
         if (schemaData.event.version != event.version)
-            throw InvalidInputException("The event version ${event.version} is different from schema")
-
+            validationErrors.add(InvalidInputException("The event version '${event.version}' is different from schema '${schemaData.event.version}'"))
         val schemaPayloadSpec = schemaData.validation["payload"]?.fields()
-                ?: throw WrongSchemaFormatException("The schema for '$schemaKey' has no payload")
-        val eventPayloadContent = event.payload
-        validateAllElements(schemaPayloadSpec, eventPayloadContent, schemaData)
 
-        schemaData.validation["identity"]?.fields()?.let { schemaIdentitySpec ->
-            val eventIdentityContent = event.identity
-            eventIdentityContent.asJsonObject["userId"]
-                    ?: throw ValidationException("The event ${event.name} has no userId")
-            validateAllElements(schemaIdentitySpec, eventIdentityContent, schemaData)
+        if (schemaPayloadSpec == null)
+            validationErrors.add(WrongSchemaFormatException("The schema '$schemaKey' has no payload"))
+        else {
+            val eventPayloadContent = event.payload
+            validateAllElements(schemaPayloadSpec, eventPayloadContent, schemaData)
+
+            schemaData.validation["identity"]?.fields()?.let { schemaIdentitySpec ->
+                val eventIdentityContent = event.identity
+                eventIdentityContent.asJsonObject["userId"]
+                        ?: throw WrongSchemaFormatException("The event '${event.name}' has no userId")
+                validateAllElements(schemaIdentitySpec, eventIdentityContent, schemaData)
+            }
+
+            schemaData.validation["metadata"]?.fields()?.let { schemaMetadataSpec ->
+                val eventMetadataContent = event.metadata
+                eventMetadataContent.asJsonObject["origin"]
+                        ?: throw WrongSchemaFormatException("The event '${event.name}' has no origin")
+                validateAllElements(schemaMetadataSpec, eventMetadataContent, schemaData)
+            }
         }
 
-        schemaData.validation["metadata"]?.fields()?.let { schemaMetadataSpec ->
-            val eventMetadataContent = event.metadata
-            eventMetadataContent.asJsonObject["origin"]
-                    ?: throw ValidationException("The event ${event.name} has no origin")
-            validateAllElements(schemaMetadataSpec, eventMetadataContent, schemaData)
-        }
+        if (validationErrors.isEmpty()) validationSuccess = true
+        return ValidationResult(validationSuccess, validationErrors, encryptedFields)
     }
 
     private fun validateAllElements(
@@ -62,26 +71,35 @@ class EventValidator(
     ) {
         schemaPayloadSpec.forEach { (key, node) ->
             val eventPayloadNode = eventPayloadContent.asJsonObject[key]
-            val expectedType = SchemaNodeTypeParser.getSchemaNodeType(schemaData, key, node)
-
-            this.validateRequiredElement(key, node, eventPayloadNode)
-
-            eventPayloadNode?.let { this.validateByType(expectedType, eventPayloadNode, schemaData) }
+            try {
+                val expectedType = SchemaNodeTypeParser.getSchemaNodeType(schemaData, key, node)
+                this.validateRequiredElement(key, node, eventPayloadNode)
+                eventPayloadNode?.let { this.validateByType(expectedType, eventPayloadNode, schemaData) }
+            }
+            catch (exception: Exception) {
+                validationErrors.add(exception)
+            }
         }
     }
 
     private fun validateByType(
             type: SchemaType,
             inputNode: JsonElement,
-            schemaData: SchemaData) {
-        when (type) {
-            is ArrayType -> this.validateArrayElement(type, inputNode, schemaData)
-            is DateType -> this.validateDateElement(type, inputNode)
-            is UserDefinedType -> {
-                val currentTypeSpec = type.userType.fields()
-                validateAllElements(currentTypeSpec, inputNode, schemaData)
+            schemaData: SchemaData
+    ) {
+        try {
+            when (type) {
+                is ArrayType -> this.validateArrayElement(type, inputNode, schemaData)
+                is DateType -> this.validateDateElement(type, inputNode)
+                is UserDefinedType -> {
+                    val currentTypeSpec = type.userType.fields()
+                    validateAllElements(currentTypeSpec, inputNode, schemaData)
+                }
+                is PrimitiveType -> type.type.verifyType(inputNode.asJsonPrimitive)
             }
-            is PrimitiveType -> type.type.verifyType(inputNode.asJsonPrimitive)
+        }
+        catch (exception: Exception) {
+            validationErrors.add(exception)
         }
     }
 
@@ -91,7 +109,7 @@ class EventValidator(
             inputElement: JsonElement?
     ) {
         if (isRequired(specNode) && (inputElement == null || inputElement.isJsonNull))
-            throw InvalidInputException("Element '$nodeKey' is required.")
+            throw InvalidInputException("Element '$nodeKey' is required")
     }
 
     private fun isRequired(specNode: JsonNode): Boolean {
@@ -105,7 +123,7 @@ class EventValidator(
             schemaData: SchemaData
     ) {
         if (!arrayElement.isJsonArray) {
-            throw InvalidInputException("Array element ${type.nodeKey} is in the wrong format.")
+            throw InvalidInputException("Array element '${type.nodeKey}' is in the wrong format")
         }
         arrayElement.asJsonArray.forEach {
             validateByType(type.contentType, it, schemaData)
@@ -117,7 +135,7 @@ class EventValidator(
         try {
             simpleDateFormat.parse(dateElement.asString)
         } catch (e: ParseException) {
-            throw InvalidInputException("Date Element ${dateElement.asString} is not in the format '${type.format}'.")
+            throw InvalidInputException("Date Element '${dateElement.asString}' is not in the format '${type.format}'")
         }
     }
 
