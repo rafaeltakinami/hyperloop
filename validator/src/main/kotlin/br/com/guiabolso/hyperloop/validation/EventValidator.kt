@@ -28,7 +28,6 @@ class EventValidator(
     private val validationErrors = mutableListOf<Throwable>()
     private val encryptedFields = mutableListOf<String>()
 
-
     override fun validate(event: RequestEvent): ValidationResult {
         val schemaKey = SchemaKey(event.name, event.version)
         val schemaData = cachedSchemaRepository.get(schemaKey)
