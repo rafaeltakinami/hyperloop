@@ -27,6 +27,7 @@ class EventValidator(
     private var validationSuccess = false
     private val validationErrors = mutableListOf<Throwable>()
     private val encryptedFields = mutableListOf<String>()
+    private val elementPath = mutableListOf<String>()
 
     override fun validate(event: RequestEvent): ValidationResult {
         val schemaKey = SchemaKey(event.name, event.version)
@@ -42,38 +43,44 @@ class EventValidator(
             validationErrors.add(WrongSchemaFormatException("The schema '$schemaKey' has no payload"))
         else {
             val eventPayloadContent = event.payload
-            validateAllElements(schemaPayloadSpec, eventPayloadContent, schemaData)
+
+            iterateSchemaElements(schemaPayloadSpec, eventPayloadContent, schemaData)
 
             schemaData.validation["identity"]?.fields()?.let { schemaIdentitySpec ->
                 val eventIdentityContent = event.identity
                 eventIdentityContent.asJsonObject["userId"]
                         ?: throw WrongSchemaFormatException("The event '${event.name}' has no userId")
-                validateAllElements(schemaIdentitySpec, eventIdentityContent, schemaData)
+                iterateSchemaElements(schemaIdentitySpec, eventIdentityContent, schemaData)
             }
 
             schemaData.validation["metadata"]?.fields()?.let { schemaMetadataSpec ->
                 val eventMetadataContent = event.metadata
                 eventMetadataContent.asJsonObject["origin"]
                         ?: throw WrongSchemaFormatException("The event '${event.name}' has no origin")
-                validateAllElements(schemaMetadataSpec, eventMetadataContent, schemaData)
+                iterateSchemaElements(schemaMetadataSpec, eventMetadataContent, schemaData)
             }
         }
 
         if (validationErrors.isEmpty()) validationSuccess = true
-        return ValidationResult(validationSuccess, validationErrors, encryptedFields)
+        return ValidationResult(validationSuccess, validationErrors, encryptedFields.distinct())
     }
 
-    private fun validateAllElements(
-            schemaPayloadSpec: InputSchemaSpec,
-            eventPayloadContent: JsonElement,
+    private fun iterateSchemaElements(
+            schemaNodeSpec: InputSchemaSpec,
+            eventNode: JsonElement,
             schemaData: SchemaData
     ) {
-        schemaPayloadSpec.forEach { (key, node) ->
-            val eventPayloadNode = eventPayloadContent.asJsonObject[key]
+        schemaNodeSpec.forEach { (key, node) ->
+            val eventNodeElement = eventNode.asJsonObject[key]
+//            if (eventNodeElement != null && !eventNodeElement.isJsonNull && this.isEncrypted(node)) {
+//                elementPath.add(key)
+//                encryptedFields.add(elementPath.toString())
+//                elementPath.remove(elementPath.lastOrNull())
+//            }
             try {
                 val expectedType = SchemaNodeTypeParser.getSchemaNodeType(schemaData, key, node)
-                this.validateRequiredElement(key, node, eventPayloadNode)
-                eventPayloadNode?.let { this.validateByType(expectedType, eventPayloadNode, schemaData) }
+                this.validateRequiredElement(key, node, eventNodeElement)
+                eventNodeElement?.let { this.validateByType(node, key, expectedType, false, eventNodeElement, schemaData) }
             }
             catch (exception: Exception) {
                 validationErrors.add(exception)
@@ -81,18 +88,41 @@ class EventValidator(
         }
     }
 
+    private fun isEncrypted(specNode: JsonNode): Boolean {
+        val schemaNodeAttributes = getSchemaNodeAttributes(specNode) ?: return false
+        return TextNode("encrypted") in schemaNodeAttributes
+    }
+
     private fun validateByType(
+            eventNodeSpec: JsonNode,
+            nodeKey: String,
             type: SchemaType,
+            isArrayElement: Boolean,
             inputNode: JsonElement,
             schemaData: SchemaData
     ) {
         try {
+            if (!inputNode.isJsonNull && this.isEncrypted(eventNodeSpec)) {
+                elementPath.add(nodeKey)
+                encryptedFields.add(elementPath.toString())
+                elementPath.remove(elementPath.lastOrNull())
+            }
             when (type) {
-                is ArrayType -> this.validateArrayElement(type, inputNode, schemaData)
+
+                is ArrayType -> {
+                    this.validateArrayElement(eventNodeSpec, nodeKey, type, inputNode, schemaData)
+                    elementPath.remove(elementPath.lastOrNull())
+                }
                 is DateType -> this.validateDateElement(type, inputNode)
                 is UserDefinedType -> {
+                    if (isArrayElement)
+                        elementPath.add("$nodeKey[*]")
+                    else
+                        elementPath.add(nodeKey)
+
                     val currentTypeSpec = type.userType.fields()
-                    validateAllElements(currentTypeSpec, inputNode, schemaData)
+                    iterateSchemaElements(currentTypeSpec, inputNode, schemaData)
+                    elementPath.remove(elementPath.lastOrNull())
                 }
                 is PrimitiveType -> type.type.verifyType(inputNode.asJsonPrimitive)
             }
@@ -117,6 +147,8 @@ class EventValidator(
     }
 
     private fun validateArrayElement(
+            eventNodeSpec: JsonNode,
+            nodeKey: String,
             type: ArrayType,
             arrayElement: JsonElement,
             schemaData: SchemaData
@@ -125,7 +157,7 @@ class EventValidator(
             throw InvalidInputException("Array element '${type.nodeKey}' is in the wrong format")
         }
         arrayElement.asJsonArray.forEach {
-            validateByType(type.contentType, it, schemaData)
+            validateByType(eventNodeSpec, nodeKey, type.contentType, true, it, schemaData)
         }
     }
 

@@ -21,13 +21,14 @@ types:
       of: string
       is:
         - required
-        - encripted
+        - encrypted
     friend:
       of: $User
     birthdate:
       of: date(yyyy/mm/dd)
       is:
         - required
+        - encrypted
     gender:
       of: string
     height:
