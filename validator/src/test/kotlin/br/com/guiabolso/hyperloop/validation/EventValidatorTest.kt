@@ -104,6 +104,10 @@ class EventValidatorTest {
         val response = eventValidator.validate(newEvent("event_test", 1, payload))
         assertTrue(response.validationSuccess)
         assertTrue(response.validationErrors.isEmpty())
+        assertTrue(response.encryptedFields.contains("users[*].name"))
+        assertTrue(response.encryptedFields.contains("users[*].friend.name"))
+        assertTrue(response.encryptedFields.contains("file.name"))
+        assertTrue(response.encryptedFields.contains("file.quantity"))
     }
 
     @Test
@@ -118,7 +122,6 @@ class EventValidatorTest {
         val response = eventValidator.validate(newEvent("event_test", 1, payload))
 
         assertFalse(response.validationSuccess)
-        //TODO(check validationErrors in a better way)
         assertTrue(expectedErrors.first().message == response.validationErrors.first().message)
         assertTrue(expectedErrors.last().message == response.validationErrors.last().message)
     }

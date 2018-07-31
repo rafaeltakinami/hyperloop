@@ -11,10 +11,14 @@ types:
       of: array($User)
     name:
       of: string
+      is:
+        - encrypted
     size:
       of: double
     quantity:
       of: long
+      is:
+        - encrypted
 
   $User:
     name:
@@ -33,6 +37,8 @@ types:
       of: string
     height:
       of: float
+      is:
+        - encrypted
     age:
       of: int
 

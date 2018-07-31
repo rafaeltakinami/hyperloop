@@ -8,7 +8,7 @@ interface Validator {
 }
 
 data class ValidationResult (
-        val validationSuccess: Boolean,
-        val validationErrors: List<Throwable>,
-        val encryptedFields: List<String>
+        var validationSuccess: Boolean,
+        val validationErrors: MutableList<Throwable>,
+        val encryptedFields: MutableList<String>
 )
