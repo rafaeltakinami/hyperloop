@@ -174,12 +174,5 @@ class EventValidator(
         }
     }
 
-    private fun getListString(list: List<String>?) : String {
-        var listConcatenated = ""
-        list?.forEach {
-            listConcatenated+= it
-            if (it != list.last()) listConcatenated+= "."
-        }
-        return listConcatenated
-    }
+    private fun getListString(list: List<String>) = list.joinToString(".")
 }
