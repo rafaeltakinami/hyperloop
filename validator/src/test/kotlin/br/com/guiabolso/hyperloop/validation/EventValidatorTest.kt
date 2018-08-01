@@ -1,13 +1,11 @@
-package br.com.guiabolso.hyperloop.validation.service
+package br.com.guiabolso.hyperloop.validation
 
-import br.com.guiabolso.events.model.Event
 import br.com.guiabolso.events.model.RequestEvent
 import br.com.guiabolso.hyperloop.exceptions.InvalidInputException
 import br.com.guiabolso.hyperloop.model.SchemaData
 import br.com.guiabolso.hyperloop.schemas.CachedSchemaRepository
 import br.com.guiabolso.hyperloop.schemas.SchemaKey
 import br.com.guiabolso.hyperloop.schemas.SchemaRepository
-import br.com.guiabolso.hyperloop.validation.EventValidator
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
@@ -17,6 +15,8 @@ import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.whenever
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import java.io.File
@@ -101,38 +101,57 @@ class EventValidatorTest {
                         "l": "Thiago"
                 """.trimIndent()
         whenever(mockSchemaRepository.get(SchemaKey("event_test", 1))).thenReturn(schema)
-        eventValidator.validate(newEvent("event_test", 1, payload))
+        val response = eventValidator.validate(newEvent("event_test", 1, payload))
+        assertTrue(response.validationSuccess)
+        assertTrue(response.validationErrors.isEmpty())
+        assertTrue(response.encryptedFields.contains("users[*].name"))
+        assertTrue(response.encryptedFields.contains("users[*].friend.name"))
+        assertTrue(response.encryptedFields.contains("file.name"))
+        assertTrue(response.encryptedFields.contains("file.quantity"))
     }
 
-    @Test(expected = InvalidInputException::class)
+    @Test
     fun `test wrong array type validation`() {
         val payload = """
                         "users": "notAnArray"
                 """.trimIndent()
         whenever(mockSchemaRepository.get(SchemaKey("event_test", 1))).thenReturn(schema)
-        eventValidator.validate(newEvent("event_test", 1, payload))
+        val expectedErrors = mutableListOf<Throwable>(
+                InvalidInputException("Array element 'users' is in the wrong format"),
+                InvalidInputException("Element 'name' is required"))
+        val response = eventValidator.validate(newEvent("event_test", 1, payload))
+
+        assertFalse(response.validationSuccess)
+        assertTrue(expectedErrors.first().message == response.validationErrors.first().message)
+        assertTrue(expectedErrors.last().message == response.validationErrors.last().message)
     }
 
-    @Test(expected = InvalidInputException::class)
+    @Test
     fun `test missing required field`() {
         whenever(mockSchemaRepository.get(SchemaKey("event_test", 1))).thenReturn(schema)
-        eventValidator.validate(newEvent("event_test", 1, ""))
+        val response = eventValidator.validate(newEvent("event_test", 1, ""))
+        assertFalse(response.validationSuccess)
+        assertTrue(response.validationErrors.first().message == "Element 'users' is required")
     }
 
-    @Test(expected = InvalidInputException::class)
+    @Test
     fun `test with event name different from schema`() {
         whenever(mockSchemaRepository.get(SchemaKey("xpto", 1))).thenReturn(schema)
-        eventValidator.validate(newEvent("xpto", 1, ""))
+        val response = eventValidator.validate(newEvent("xpto", 1, ""))
+        assertFalse(response.validationSuccess)
+        assertTrue(response.validationErrors.first().message == "The event name 'xpto' is different from schema 'event_test'")
     }
 
 
-    @Test(expected = InvalidInputException::class)
+    @Test
     fun `test with event version different from schema`() {
         whenever(mockSchemaRepository.get(SchemaKey("event_test", 3))).thenReturn(schema)
-        eventValidator.validate(newEvent("event_test", 3, ""))
+        val response = eventValidator.validate(newEvent("event_test", 3, ""))
+        assertFalse(response.validationSuccess)
+        assertTrue(response.validationErrors.first().message == "The event version '3' is different from schema '1'")
     }
 
-    private fun newEvent(eventName: String, eventVersion: Int, payload: String): Event {
+    private fun newEvent(eventName: String, eventVersion: Int, payload: String): RequestEvent {
         val identity = JsonObject()
         identity.addProperty("userId", 1)
 

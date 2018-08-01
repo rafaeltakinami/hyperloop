@@ -11,27 +11,34 @@ types:
       of: array($User)
     name:
       of: string
+      is:
+        - encrypted
     size:
       of: double
     quantity:
       of: long
+      is:
+        - encrypted
 
   $User:
     name:
       of: string
       is:
         - required
-        - encripted
+        - encrypted
     friend:
       of: $User
     birthdate:
       of: date(yyyy/mm/dd)
       is:
         - required
+        - encrypted
     gender:
       of: string
     height:
       of: float
+      is:
+        - encrypted
     age:
       of: int
 

@@ -1,6 +1,6 @@
 package br.com.guiabolso.hyperloop
 
-import br.com.guiabolso.events.model.Event
+import br.com.guiabolso.events.model.RequestEvent
 import br.com.guiabolso.hyperloop.cryptography.cypher.MessageCypher
 import br.com.guiabolso.hyperloop.cryptography.cypher.NoOpMessageCypher
 import br.com.guiabolso.hyperloop.exceptions.SendMessageException
@@ -19,7 +19,7 @@ constructor(
 
     private val gson = GsonBuilder().serializeNulls().create()
 
-    fun offer(event: Event): MessageResult {
+    fun offer(event: RequestEvent): MessageResult {
         validator.validate(event)
 
         val encryptedData = messageCypher.cypher(gson.toJson(event))
