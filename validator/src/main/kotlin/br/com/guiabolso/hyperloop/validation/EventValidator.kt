@@ -80,10 +80,9 @@ class EventValidator(
                 val expectedType = SchemaNodeTypeParser.getSchemaNodeType(schemaData, key, node)
                 this.validateRequiredElement(key, node, eventNodeElement)
                 eventNodeElement?.let {
-                    this.validateByType(node, expectedType, schemaData, eventNodeElement,false, validationResult, encryptedElementPath)
+                    this.validateByType(node, expectedType, schemaData, eventNodeElement, false, validationResult, encryptedElementPath)
                 }
-            }
-            catch (exception: Exception) {
+            } catch (exception: Exception) {
                 validationResult.validationErrors.add(exception)
             }
         }
@@ -120,8 +119,7 @@ class EventValidator(
                 }
                 is PrimitiveType -> schemaType.type.verifyType(inputNode.asJsonPrimitive)
             }
-        }
-        catch (exception: Exception) {
+        } catch (exception: Exception) {
             validationResult.validationErrors.add(exception)
         }
     }
@@ -161,7 +159,7 @@ class EventValidator(
             throw InvalidInputException("Array element '${type.nodeKey}' is in the wrong format")
         }
         arrayElement.asJsonArray.forEach {
-            validateByType(schemaNodeSpec, type.contentType, schemaData, it,true, validationResult, encryptedElementPath)
+            validateByType(schemaNodeSpec, type.contentType, schemaData, it, true, validationResult, encryptedElementPath)
         }
     }
 
