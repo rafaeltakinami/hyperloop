@@ -5,7 +5,9 @@ import br.com.guiabolso.hyperloop.exceptions.InvalidInputException
 import br.com.guiabolso.hyperloop.exceptions.WrongSchemaFormatException
 import br.com.guiabolso.hyperloop.model.SchemaData
 import br.com.guiabolso.hyperloop.schemas.CachedSchemaRepository
+import br.com.guiabolso.hyperloop.schemas.SchemaDataRepository
 import br.com.guiabolso.hyperloop.schemas.SchemaKey
+import br.com.guiabolso.hyperloop.schemas.SchemaRepository
 import br.com.guiabolso.hyperloop.validation.types.ArrayType
 import br.com.guiabolso.hyperloop.validation.types.DateType
 import br.com.guiabolso.hyperloop.validation.types.PrimitiveType
@@ -22,8 +24,15 @@ import kotlin.collections.MutableMap.MutableEntry
 typealias InputSchemaSpec = MutableIterator<MutableEntry<String, JsonNode>>
 
 class EventValidator(
-        private val cachedSchemaRepository: CachedSchemaRepository<SchemaData>
+        schemaRepository: SchemaRepository<String>
 ) : Validator {
+
+    private val cachedSchemaRepository: CachedSchemaRepository<SchemaData>
+
+    init {
+        val schemaDataRepository = SchemaDataRepository(schemaRepository)
+        cachedSchemaRepository = CachedSchemaRepository(schemaDataRepository)
+    }
 
     override fun validate(event: RequestEvent): ValidationResult {
         val validationResult = ValidationResult(false, mutableListOf(), mutableListOf())

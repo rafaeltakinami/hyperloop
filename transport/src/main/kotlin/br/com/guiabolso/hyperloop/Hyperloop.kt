@@ -5,13 +5,12 @@ import br.com.guiabolso.hyperloop.cryptography.cypher.MessageCypher
 import br.com.guiabolso.hyperloop.cryptography.cypher.NoOpMessageCypher
 import br.com.guiabolso.hyperloop.environment.getEnv
 import br.com.guiabolso.hyperloop.exceptions.SendMessageException
-import br.com.guiabolso.hyperloop.schemas.CachedSchemaRepository
-import br.com.guiabolso.hyperloop.schemas.SchemaDataRepository
 import br.com.guiabolso.hyperloop.schemas.aws.S3SchemaRepository
 import br.com.guiabolso.hyperloop.transport.MessageResult
 import br.com.guiabolso.hyperloop.transport.Transport
 import br.com.guiabolso.hyperloop.validation.EventValidator
 import br.com.guiabolso.hyperloop.validation.Validator
+import br.com.guiabolso.hyperloop.validation.exceptions.ValidationException
 import com.amazonaws.regions.Regions
 import com.google.gson.GsonBuilder
 
@@ -26,7 +25,11 @@ constructor(
     private val gson = GsonBuilder().serializeNulls().create()
 
     fun offer(event: RequestEvent): MessageResult {
-        validator.validate(event)
+        val validationResult = validator.validate(event)
+
+        if (!validationResult.validationSuccess) {
+            throw ValidationException("Error validating event against schema", validationResult.validationErrors)
+        }
 
         val encryptedData = messageCypher.cypher(gson.toJson(event))
 
@@ -44,8 +47,7 @@ constructor(
             val bucket = getEnv("HYPERLOOP_BUCKET", "hyperloop-schemas")
             val region = Regions.fromName(getEnv("HYPERLOOP_REGION", "sa-east-1"))
             val s3SchemaRepository = S3SchemaRepository(bucket, region)
-            val schemaDataRepository = SchemaDataRepository(s3SchemaRepository)
-            return EventValidator(CachedSchemaRepository(schemaDataRepository))
+            return EventValidator(s3SchemaRepository)
         }
     }
 }

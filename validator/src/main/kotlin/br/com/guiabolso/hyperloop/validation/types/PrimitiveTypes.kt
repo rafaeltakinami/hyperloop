@@ -1,14 +1,13 @@
 package br.com.guiabolso.hyperloop.validation.types
 
 import br.com.guiabolso.hyperloop.exceptions.InvalidInputException
-import br.com.guiabolso.hyperloop.validation.exceptions.ValidationException
 import com.google.gson.JsonPrimitive
 
 enum class PrimitiveTypes {
     STRING {
         override fun verifyType(element: JsonPrimitive) {
             if (!element.isString) {
-                throw ValidationException("Input $element is not a string")
+                throw InvalidInputException("Input $element is not a string")
             }
         }
     },
