@@ -2,15 +2,8 @@ package br.com.guiabolso.hyperloop.validation
 
 import br.com.guiabolso.events.model.RequestEvent
 import br.com.guiabolso.hyperloop.exceptions.InvalidInputException
-import br.com.guiabolso.hyperloop.model.SchemaData
-import br.com.guiabolso.hyperloop.schemas.CachedSchemaRepository
 import br.com.guiabolso.hyperloop.schemas.SchemaKey
 import br.com.guiabolso.hyperloop.schemas.SchemaRepository
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
-import com.fasterxml.jackson.module.kotlin.KotlinModule
-import com.fasterxml.jackson.module.kotlin.readValue
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.nhaarman.mockitokotlin2.mock
@@ -23,16 +16,15 @@ import java.io.File
 
 class EventValidatorTest {
 
-    private lateinit var mockSchemaRepository: SchemaRepository<SchemaData>
-    private lateinit var cachedSchemaRepository: CachedSchemaRepository<SchemaData>
+    private lateinit var mockSchemaRepository: SchemaRepository<String>
     private lateinit var eventValidator: EventValidator
 
-    private val schema = loadSchemaFromFile()
+    private lateinit var schema: String
     @Before
     fun setUp() {
+        schema = loadSchemaFromFile()
         mockSchemaRepository = mock()
-        cachedSchemaRepository = CachedSchemaRepository(mockSchemaRepository)
-        eventValidator = EventValidator(cachedSchemaRepository)
+        eventValidator = EventValidator(mockSchemaRepository)
     }
 
     @Test
@@ -172,15 +164,7 @@ class EventValidatorTest {
         )
     }
 
-    private fun loadSchemaFromFile(): SchemaData {
-        val schemaStr = File("src/main/resources/schema.yml").readText(Charsets.UTF_8)
-        return mapper.readValue(schemaStr)
-    }
-
-    companion object {
-        private val mapper = ObjectMapper(YAMLFactory())
-                .registerModule(KotlinModule())
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-                .configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true)
+    private fun loadSchemaFromFile(): String {
+        return File("src/main/resources/schema.yml").readText(Charsets.UTF_8)
     }
 }
