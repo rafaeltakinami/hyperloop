@@ -6,7 +6,6 @@ data class SchemaKey(
 ) {
 
     override fun toString(): String {
-        return "${name}_V$version.yaml"
+        return "${name}_V$version.yaml".replace(':', '_')
     }
-
 }
