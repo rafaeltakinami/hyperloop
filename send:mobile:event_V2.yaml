@@ -1,0 +1,43 @@
+schema:
+  version: 1
+
+event:
+  name: send:mobile:event
+  version: 2
+
+types:
+  $Property:
+    key:
+      of: string
+      is:
+        - required
+    value:
+      of: string
+      is:
+        - required
+
+validation:
+  payload:
+    name:
+      of: string
+      is:
+        - required
+    createdAt:
+      of: date(yyyy-MM-dd HH:mm:ss Z)
+      is:
+        - required
+    properties:
+      of: array($Property)
+      is:
+        - required
+
+  identity:
+    userId:
+      of: long
+      is:
+        - required
+  metadata:
+    origin:
+      of: string
+      is:
+        - required
