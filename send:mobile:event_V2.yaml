@@ -28,8 +28,6 @@ validation:
         - required
     properties:
       of: array($Property)
-      is:
-        - required
 
   identity:
     userId:
