@@ -23,7 +23,7 @@ object SchemaNodeTypeParser {
                     "string", "long", "int", "float", "double", "boolean" -> PrimitiveType(nodeKey, type)
                     "date" -> DateType(nodeKey, attribute)
                     else -> if (isUserDefinedType(attribute.notNull("Array content type should not be null"), schema)) {
-                        UserDefinedType(nodeKey, schema.types.get(attribute))
+                        UserDefinedType(nodeKey, schema.types!!.get(attribute))
                     } else {
                         throw WrongSchemaFormatException("Illegal type $type. $type is neither primitive, array, date nor user defined")
                     }
@@ -32,7 +32,7 @@ object SchemaNodeTypeParser {
             }
             "date" -> DateType(nodeKey, attribute.notNull("Date type should have one parameter"))
             else -> if (isUserDefinedType(type, schema)) {
-                UserDefinedType(nodeKey, schema.types.get(type))
+                UserDefinedType(nodeKey, schema.types!!.get(type))
             } else {
                 throw WrongSchemaFormatException("Illegal type $type. $type is neither primitive, array, date nor user defined")
             }
@@ -40,7 +40,7 @@ object SchemaNodeTypeParser {
     }
 
     private fun isUserDefinedType(type: String, schema: SchemaData): Boolean {
-        return schema.types.get(type) != null
+        return schema.types?.get(type) != null
     }
 
     private fun String?.notNull(message: String) = this ?: throw WrongSchemaFormatException(message)
