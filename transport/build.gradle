@@ -5,6 +5,9 @@ dependencies {
     compile group: 'com.amazonaws', name: 'aws-encryption-sdk-java', version: '1.3.2'
 
     compile 'com.github.salomonbrys.kotson:kotson:2.5.0'
+
+    compile group: 'commons-codec', name: 'commons-codec', version: '1.11'
+
 }
 
 apply plugin: 'com.novoda.bintray-release'
