@@ -22,13 +22,13 @@ class EventValidatorTest {
     private lateinit var schema: String
     @Before
     fun setUp() {
-        schema = loadSchemaFromFile()
+        schema = loadSchemaFromFile("/schema.yml")
         mockSchemaRepository = mock()
         eventValidator = EventValidator(mockSchemaRepository)
     }
 
     @Test
-    fun `test succesfull validation`() {
+    fun `test successful validation`() {
         val payload = """
                         "users": [
                             {
@@ -103,6 +103,24 @@ class EventValidatorTest {
     }
 
     @Test
+    fun `test successful validation with null types `() {
+        val schema = loadSchemaFromFile("/null_type_schema.yml")
+        val payload = """
+                        "name": "Thiago",
+                        "x": "Thiago",
+                        "y": "Thiago",
+                        "o": "Thiago",
+                        "k": "Thiago",
+                        "l": "Thiago"
+                """.trimIndent()
+        whenever(mockSchemaRepository.get(SchemaKey("event_test", 1))).thenReturn(schema)
+        val response = eventValidator.validate(newEvent("event_test", 1, payload))
+        assertTrue(response.validationSuccess)
+        assertTrue(response.validationErrors.isEmpty())
+        assertTrue(response.encryptedFields.isEmpty())
+    }
+
+    @Test
     fun `test wrong array type validation`() {
         val payload = """
                         "users": "notAnArray"
@@ -164,7 +182,7 @@ class EventValidatorTest {
         )
     }
 
-    private fun loadSchemaFromFile(): String {
-        return File("src/main/resources/schema.yml").readText(Charsets.UTF_8)
+    private fun loadSchemaFromFile(path: String): String {
+        return this::class.java.getResourceAsStream(path).bufferedReader().use { it.readText() }
     }
 }

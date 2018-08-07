@@ -7,7 +7,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 data class SchemaData(
         val schema: Schema,
         val event: Event,
-        val types: ObjectNode,
+        val types: ObjectNode?,
         val validation: ObjectNode
 )
 
