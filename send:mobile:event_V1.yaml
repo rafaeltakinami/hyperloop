@@ -27,7 +27,7 @@ validation:
       is:
         - required
     createdAt:
-      of: date(yyyy-MM-dd HH:mm:ss Z)
+      of: string
       is:
         - required
     properties:
