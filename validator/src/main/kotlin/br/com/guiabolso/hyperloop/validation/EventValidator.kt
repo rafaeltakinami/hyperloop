@@ -51,12 +51,15 @@ class EventValidator(
             validationResult.validationErrors.add(WrongSchemaFormatException("The schema '$schemaKey' has no payload"))
         else {
             val eventPayloadContent = event.payload
+            encryptedElementPath.add("$.payload")
             iterateSchemaElements(schemaPayloadSpec, schemaData, eventPayloadContent, validationResult, encryptedElementPath)
         }
 
         schemaData.validation["identity"]?.fields()?.let { schemaIdentitySpec ->
             val eventIdentityContent = event.identity
             val userId = eventIdentityContent.asJsonObject["userId"]
+            encryptedElementPath.clear()
+            encryptedElementPath.add("$.identity")
             if (userId == null)
                 validationResult.validationErrors.add(WrongSchemaFormatException("The event '${event.name}' has no userId"))
             else
@@ -66,6 +69,8 @@ class EventValidator(
         schemaData.validation["metadata"]?.fields()?.let { schemaMetadataSpec ->
             val eventMetadataContent = event.metadata
             val origin = eventMetadataContent.asJsonObject["origin"]
+            encryptedElementPath.clear()
+            encryptedElementPath.add("$.metadata")
             if (origin == null)
                 validationResult.validationErrors.add(WrongSchemaFormatException("The event '${event.name}' has no origin"))
             else

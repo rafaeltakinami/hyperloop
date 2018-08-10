@@ -12,7 +12,6 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-import java.io.File
 
 class EventValidatorTest {
 
@@ -92,14 +91,17 @@ class EventValidatorTest {
                         "k": "Thiago",
                         "l": "Thiago"
                 """.trimIndent()
+
         whenever(mockSchemaRepository.get(SchemaKey("event_test", 1))).thenReturn(schema)
         val response = eventValidator.validate(newEvent("event_test", 1, payload))
         assertTrue(response.validationSuccess)
         assertTrue(response.validationErrors.isEmpty())
-        assertTrue(response.encryptedFields.contains("users[*].name"))
-        assertTrue(response.encryptedFields.contains("users[*].friend.name"))
-        assertTrue(response.encryptedFields.contains("file.name"))
-        assertTrue(response.encryptedFields.contains("file.quantity"))
+        assertTrue(response.encryptedFields.contains("payload.users[*].name"))
+        assertTrue(response.encryptedFields.contains("payload.users[*].friend.name"))
+        assertTrue(response.encryptedFields.contains("payload.file.name"))
+        assertTrue(response.encryptedFields.contains("payload.file.quantity"))
+        assertTrue(response.encryptedFields.contains("identity.userId"))
+        assertTrue(response.encryptedFields.contains("metadata.origin"))
     }
 
     @Test
