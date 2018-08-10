@@ -10,8 +10,9 @@ The library is divided in 2 modules: validator and transport
 
 ## Validator
 
-The Validator module contains all the code used to check that an event respects a specified schema. For example the schema
-and event defined below are a valid representation of the usage of the lib:
+The Validator module contains all the code used to check that an event respects a specified schema. 
+This lib is already called by Transport lib which is set with default settings to validate events before sending them.
+For example the schema and event defined below are a valid representation of the usage of the lib:
 
 ***schema:***
 ```yaml
@@ -97,7 +98,26 @@ validation:
 
 ### Usage
 
-//TODO: insert usage of validator
+```kotlin
+    val event: RequestEvent
+    
+    val S3BucketName = "s3.bucket.name"
+    val S3BucketRegion = "s3.bucket.region"
+    val s3SchemaRepository = S3SchemaRepository(S3BucketName, Regions.fromName(S3BucketRegion))
+    val eventValidator = EventValidator(schemaRepository)
+    
+    val validationResult = eventValidator.validate(event)
+    
+    if (validationResult.validationSuccess) {
+        //success
+    }
+    else
+        val errors: List<Throwable> = validationResult.validationErrors
+    
+    val encryptedFieldsJsonPaths: List<String> = validationResult.encryptedFields
+    
+    
+```
 
 ## Transport
 

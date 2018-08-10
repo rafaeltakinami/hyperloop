@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class SchemaData(
         val schema: Schema,
-        val event: Event,
+        val event: EventKey,
         val types: ObjectNode?,
         val validation: ObjectNode
 )
@@ -15,7 +15,7 @@ data class Schema(
         val version: Int
 )
 
-data class Event(
+data class EventKey(
         val name: String,
         val version: Int
 )

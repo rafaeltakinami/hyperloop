@@ -12,33 +12,33 @@ types:
     name:
       of: string
       is:
-        - encrypted
+      - encrypted
     size:
       of: double
     quantity:
       of: long
       is:
-        - encrypted
+      - encrypted
 
   $User:
     name:
       of: string
       is:
-        - required
-        - encrypted
+      - required
+      - encrypted
     friend:
       of: $User
     birthdate:
       of: date(yyyy/mm/dd)
       is:
-        - required
-        - encrypted
+      - required
+      - encrypted
     gender:
       of: string
     height:
       of: float
       is:
-        - encrypted
+      - encrypted
     age:
       of: int
 
@@ -47,20 +47,22 @@ validation:
     users:
       of: array($User)
       is:
-        - required
+      - required
     file:
       of: $File
     name:
       of: string
       is:
-        - required
+      - required
   identity:
     userId:
       of: long
       is:
-        - required
+      - required
+      - encrypted
   metadata:
     origin:
-        of: string
-        is:
-          - required
+      of: string
+      is:
+      - required
+      - encrypted
