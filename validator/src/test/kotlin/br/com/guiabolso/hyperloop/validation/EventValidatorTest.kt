@@ -110,16 +110,78 @@ class EventValidatorTest {
         val payload = """
                         "name": "Thiago",
                         "x": "Thiago",
-                        "y": "Thiago",
-                        "o": "Thiago",
-                        "k": "Thiago",
-                        "l": "Thiago"
+                        "y": "Thiago"
                 """.trimIndent()
         whenever(mockSchemaRepository.get(SchemaKey("event_test", 1))).thenReturn(schema)
         val response = eventValidator.validate(newEvent("event_test", 1, payload))
         assertTrue(response.validationSuccess)
         assertTrue(response.validationErrors.isEmpty())
         assertTrue(response.encryptedFields.isEmpty())
+    }
+
+    @Test
+    fun `test event with payload but no payload specification`() {
+        val payload = """
+                        "name": "Thiago"
+                """.trimIndent()
+        val schema = loadSchemaFromFile("/null_payload_schema.yml")
+        val event = newEvent("event_test", 1, payload)
+        whenever(mockSchemaRepository.get(SchemaKey("event_test", 1))).thenReturn(schema)
+        val expectedErrors = mutableListOf<Throwable>(
+                InvalidInputException("Event has non-empty payload but the schema has no specification"))
+        val response = eventValidator.validate(event)
+
+        assertFalse(response.validationSuccess)
+        assertTrue(expectedErrors[0].message == response.validationErrors.elementAt(0).message)
+    }
+
+    @Test
+    fun `test event with userId but no identity specification`() {
+        val payload = """
+                        "name": "Thiago"
+                """.trimIndent()
+        val schema = loadSchemaFromFile("/null_identity_schema.yml")
+        val event = newEvent("event_test",1, payload)
+
+        whenever(mockSchemaRepository.get(SchemaKey("event_test", 1))).thenReturn(schema)
+
+        val response = eventValidator.validate(event)
+
+        assertTrue(response.validationSuccess)
+    }
+
+    @Test
+    fun `test event with origin but no metadata specification`() {
+        val payload = """
+                        "name": "Thiago"
+                """.trimIndent()
+        val schema = loadSchemaFromFile("/null_metadata_schema.yml")
+        val event = newEvent("event_test",1, payload)
+
+        whenever(mockSchemaRepository.get(SchemaKey("event_test", 1))).thenReturn(schema)
+
+        val response = eventValidator.validate(event)
+
+        assertTrue(response.validationSuccess)
+    }
+
+    @Test
+    fun `test event with no userId nor origin`() {
+        val schema = loadSchemaFromFile("/null_type_schema.yml")
+        val event = newEvent("event_test", 1, "")
+        event.metadata.remove("origin")
+        event.identity.remove("userId")
+        whenever(mockSchemaRepository.get(SchemaKey("event_test", 1))).thenReturn(schema)
+        val expectedErrors = mutableListOf<Throwable>(
+                InvalidInputException("Element 'name' is required"),
+                InvalidInputException("Element 'userId' is required"),
+                InvalidInputException("Element 'origin' is required"))
+        val response = eventValidator.validate(event)
+
+        assertFalse(response.validationSuccess)
+        assertTrue(expectedErrors[0].message == response.validationErrors.elementAt(0).message)
+        assertTrue(expectedErrors[1].message == response.validationErrors.elementAt(1).message)
+        assertTrue(expectedErrors[2].message == response.validationErrors.elementAt(2).message)
     }
 
     @Test
@@ -139,21 +201,12 @@ class EventValidatorTest {
     }
 
     @Test
-    fun `test missing required field`() {
-        whenever(mockSchemaRepository.get(SchemaKey("event_test", 1))).thenReturn(schema)
-        val response = eventValidator.validate(newEvent("event_test", 1, ""))
-        assertFalse(response.validationSuccess)
-        assertTrue(response.validationErrors.first().message == "Element 'users' is required")
-    }
-
-    @Test
     fun `test with event name different from schema`() {
         whenever(mockSchemaRepository.get(SchemaKey("xpto", 1))).thenReturn(schema)
         val response = eventValidator.validate(newEvent("xpto", 1, ""))
         assertFalse(response.validationSuccess)
         assertTrue(response.validationErrors.first().message == "The event name 'xpto' is different from schema 'event_test'")
     }
-
 
     @Test
     fun `test with event version different from schema`() {

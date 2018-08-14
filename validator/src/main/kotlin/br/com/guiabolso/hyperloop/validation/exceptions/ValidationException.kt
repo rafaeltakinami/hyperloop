@@ -2,7 +2,7 @@ package br.com.guiabolso.hyperloop.validation.exceptions
 
 class ValidationException(
         message: String,
-        private val errors: List<Throwable>
+        private val errors: Set<Throwable>
 ) : RuntimeException(message) {
 
     override val message: String?

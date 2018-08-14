@@ -53,7 +53,7 @@ class HyperloopTest {
     @Test
     fun `test can send event as message`() {
         whenever(transport.sendMessage(any())).thenReturn(MessageResult("some-id", eventMD5))
-        whenever(validator.validate(any())).thenReturn(ValidationResult(true, mutableListOf(), mutableListOf()))
+        whenever(validator.validate(any())).thenReturn(ValidationResult(true, mutableSetOf(), mutableSetOf()))
         whenever(cryptographyEngine.cypher(any())).thenAnswer {
             it.arguments[0] as String
         }
@@ -67,7 +67,7 @@ class HyperloopTest {
     @Test(expected = SendMessageException::class)
     fun `test send event fails with invalid md5`() {
         whenever(transport.sendMessage(any())).thenReturn(MessageResult("some-id", "wrong-md5-hash"))
-        whenever(validator.validate(any())).thenReturn(ValidationResult(true, mutableListOf(), mutableListOf()))
+        whenever(validator.validate(any())).thenReturn(ValidationResult(true, mutableSetOf(), mutableSetOf()))
         whenever(cryptographyEngine.cypher(any())).thenAnswer {
             it.arguments[0] as String
         }
@@ -78,7 +78,7 @@ class HyperloopTest {
     @Test(expected = ValidationException::class)
     fun `test validate event fails`() {
         whenever(transport.sendMessage(any())).thenReturn(MessageResult("some-id", "wrong-md5-hash"))
-        whenever(validator.validate(any())).thenReturn(ValidationResult(false, mutableListOf(InvalidInputException("some input was invalid")), mutableListOf()))
+        whenever(validator.validate(any())).thenReturn(ValidationResult(false, mutableSetOf(InvalidInputException("some input was invalid")), mutableSetOf()))
         whenever(cryptographyEngine.cypher(any())).thenAnswer {
             it.arguments[0] as String
         }
