@@ -51,7 +51,6 @@ class EventValidator(
         if (!eventPayloadContent.isEmpty() && schemaPayloadSpec == null)
             validationResult.validationErrors.add(InvalidInputException("Event has non-empty payload but the schema has no specification"))
 
-
         schemaPayloadSpec?.let { payloadSpec ->
             encryptedElementPath.add("$.payload")
             iterateSchemaElements(payloadSpec, schemaData, eventPayloadContent, validationResult, encryptedElementPath)
