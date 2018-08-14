@@ -5,7 +5,7 @@ import java.util.*
 class InvalidInputException(message: String) : RuntimeException(message) {
 
     override fun equals(other: Any?): Boolean {
-        other as InvalidInputException
+        if (other !is InvalidInputException) return false
         if (this.message != other.message) return false
         return true
     }
