@@ -9,6 +9,6 @@ interface Validator {
 
 data class ValidationResult (
         var validationSuccess: Boolean,
-        val validationErrors: MutableList<Throwable>,
-        val encryptedFields: MutableList<String>
+        val validationErrors: MutableSet<Throwable>,
+        val encryptedFields: MutableSet<String>
 )

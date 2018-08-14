@@ -2,7 +2,6 @@ package br.com.guiabolso.hyperloop.validation
 
 import br.com.guiabolso.events.model.RequestEvent
 import br.com.guiabolso.hyperloop.exceptions.InvalidInputException
-import br.com.guiabolso.hyperloop.exceptions.WrongSchemaFormatException
 import br.com.guiabolso.hyperloop.model.SchemaData
 import br.com.guiabolso.hyperloop.schemas.CachedSchemaRepository
 import br.com.guiabolso.hyperloop.schemas.SchemaDataRepository
@@ -16,7 +15,9 @@ import br.com.guiabolso.hyperloop.validation.types.SchemaType
 import br.com.guiabolso.hyperloop.validation.types.UserDefinedType
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.TextNode
+import com.google.gson.JsonArray
 import com.google.gson.JsonElement
+import com.google.gson.JsonObject
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import kotlin.collections.MutableMap.MutableEntry
@@ -35,7 +36,7 @@ class EventValidator(
     }
 
     override fun validate(event: RequestEvent): ValidationResult {
-        val validationResult = ValidationResult(false, mutableListOf(), mutableListOf())
+        val validationResult = ValidationResult(false, mutableSetOf(), mutableSetOf())
         val encryptedElementPath = mutableListOf<String>()
         val schemaKey = SchemaKey(event.name, event.version)
         val schemaData = cachedSchemaRepository.get(schemaKey)
@@ -45,36 +46,34 @@ class EventValidator(
         if (schemaData.event.version != event.version)
             validationResult.validationErrors.add(InvalidInputException("The event version '${event.version}' is different from schema '${schemaData.event.version}'"))
 
-
         val schemaPayloadSpec = schemaData.validation["payload"]?.fields()
-        if (schemaPayloadSpec == null)
-            validationResult.validationErrors.add(WrongSchemaFormatException("The schema '$schemaKey' has no payload"))
-        else {
-            val eventPayloadContent = event.payload
+        val eventPayloadContent = event.payload
+        if (!eventPayloadContent.isEmpty() && schemaPayloadSpec == null)
+            validationResult.validationErrors.add(InvalidInputException("Event has non-empty payload but the schema has no specification"))
+
+        schemaPayloadSpec?.let { payloadSpec ->
             encryptedElementPath.add("$.payload")
-            iterateSchemaElements(schemaPayloadSpec, schemaData, eventPayloadContent, validationResult, encryptedElementPath)
+            iterateSchemaElements(payloadSpec, schemaData, eventPayloadContent, validationResult, encryptedElementPath)
         }
+
+        val eventIdentityContent = event.identity
+        val userId = eventIdentityContent.asJsonObject["userId"]
+        userId?: validationResult.validationErrors.add(InvalidInputException("Element 'userId' is required"))
 
         schemaData.validation["identity"]?.fields()?.let { schemaIdentitySpec ->
-            val eventIdentityContent = event.identity
-            val userId = eventIdentityContent.asJsonObject["userId"]
             encryptedElementPath.clear()
             encryptedElementPath.add("$.identity")
-            if (userId == null)
-                validationResult.validationErrors.add(WrongSchemaFormatException("The event '${event.name}' has no userId"))
-            else
-                this.iterateSchemaElements(schemaIdentitySpec, schemaData, eventIdentityContent, validationResult, encryptedElementPath)
+            this.iterateSchemaElements(schemaIdentitySpec, schemaData, eventIdentityContent, validationResult, encryptedElementPath)
         }
 
+        val eventMetadataContent = event.metadata
+        val origin = eventMetadataContent.asJsonObject["origin"]
+        origin?: validationResult.validationErrors.add(InvalidInputException("Element 'origin' is required"))
+
         schemaData.validation["metadata"]?.fields()?.let { schemaMetadataSpec ->
-            val eventMetadataContent = event.metadata
-            val origin = eventMetadataContent.asJsonObject["origin"]
             encryptedElementPath.clear()
             encryptedElementPath.add("$.metadata")
-            if (origin == null)
-                validationResult.validationErrors.add(WrongSchemaFormatException("The event '${event.name}' has no origin"))
-            else
-                this.iterateSchemaElements(schemaMetadataSpec, schemaData, eventMetadataContent, validationResult, encryptedElementPath)
+            this.iterateSchemaElements(schemaMetadataSpec, schemaData, eventMetadataContent, validationResult, encryptedElementPath)
         }
 
         if (validationResult.validationErrors.isEmpty()) validationResult.validationSuccess = true
@@ -114,8 +113,7 @@ class EventValidator(
         try {
             if (!inputNode.isJsonNull && this.isEncrypted(schemaNodeSpec)) {
                 encryptedElementPath.add(schemaType.nodeKey)
-                if (!validationResult.encryptedFields.contains(getListString(encryptedElementPath)))
-                    validationResult.encryptedFields.add(getListString(encryptedElementPath))
+                validationResult.encryptedFields.add(getListString(encryptedElementPath))
                 encryptedElementPath.remove(encryptedElementPath.lastOrNull())
             }
             when (schemaType) {
@@ -187,4 +185,10 @@ class EventValidator(
     }
 
     private fun getListString(list: List<String>) = list.joinToString(".")
+
+    private fun JsonElement.isEmpty() = when(this) {
+        is JsonObject -> this.size() == 0
+        is JsonArray -> this.size() == 0
+        else -> throw IllegalStateException("JsonElement of type ${this::class.simpleName} not supported")
+    }
 }

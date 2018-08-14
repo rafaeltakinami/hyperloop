@@ -8,14 +8,13 @@ class ValidationExceptionTest {
 
     @Test
     fun `test error message is correct`() {
-        val errors = listOf(IllegalArgumentException("some illegal argument"), IllegalStateException("some illegal state"))
+        val errors = setOf(IllegalArgumentException("some illegal argument"), IllegalStateException("some illegal state"))
         val validationException = ValidationException("some message", errors)
 
         assertEquals(validationException.message, """|some message
                                                      |errors:
                                                             |	some illegal argument
                                                             |	some illegal state""".trimMargin())
-
     }
 }
 

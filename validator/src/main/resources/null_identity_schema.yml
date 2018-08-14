@@ -1,0 +1,18 @@
+schema:
+  version: 1
+
+event:
+  name: event_test
+  version: 1
+
+validation:
+  payload:
+    name:
+      of: string
+      is:
+        - required
+  metadata:
+    origin:
+        of: string
+        is:
+          - required
