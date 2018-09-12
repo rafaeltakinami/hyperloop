@@ -8,14 +8,49 @@ Hyperloop is a simple library used to validate and send [events](https://github.
 
 The library is divided in 2 modules: validator and transport
 
-Validator
----
 
-The Validator module contains all the code used to check that an event respects a specified schema. 
-This lib is already called by Transport lib which is set with default settings to validate events before sending them.
-For example the schema and event defined below are a valid representation of the usage of the lib:
 
-***schema:***
+Structure
+-
+
+#### Request Event
+```json
+{
+  "name": "example:event",
+  "version": 1,
+  "payload": {
+    "users": [
+      {
+        "name": "Thiago Bardella",
+        "birthdate": "22/05/1990",
+        "gender": "male"
+      },
+      {
+        "name": "Bruno Ortiz",
+        "birthdate": "15/02/1990",
+        "gender": "male"
+      }
+    ],
+    "file": {
+      "name": "document.png",
+      "owner": {
+        "name": "Thiago Bardella",
+        "birthdate": "22/05/1990",
+        "gender": "male"
+      }
+    }
+  },
+  "identity":{
+    "userId": 12345
+  },
+  "metadata":{
+    "origin": "system_xpto"
+  }
+}
+```
+
+#### Schema
+
 ```yaml
 schema:
  version: 1
@@ -61,86 +96,51 @@ validation:
       - required
 ```
 
-***event:***
-```json
-{
-  "name": "example:event",
-  "version": 1,
-  "payload": {
-    "users": [
-      {
-        "name": "Thiago Bardella",
-        "birthdate": "22/05/1990",
-        "gender": "male"
-      },
-      {
-        "name": "Bruno Ortiz",
-        "birthdate": "15/02/1990",
-        "gender": "male"
-      }
-    ],
-    "file": {
-      "name": "document.png",
-      "owner": {
-        "name": "Thiago Bardella",
-        "birthdate": "22/05/1990",
-        "gender": "male"
-      }
-    }
-  },
-  "identity":{
-    "userId": 12345
-  },
-  "metadata":{
-    "origin": "system_xpto"
-  }
-}
-```
+### Schema Properties
 
-### Schema Structure
 
 * #### schema 
 
-    **version**: version of the schema
+    - **version**: version of the schema
     
-    ```yaml
-    schema:
-      version: 1
-    ```
+        ```yaml
+        schema:
+          version: 1
+        ```
 
 * #### event
 
-    **name**: Event name  
-    **version**: Event version
+    - **name**: Event name  
+    - **version**: Event version
     
-    ```yaml
-    event: 
-      name: example:event
-      version: 1
-    ```
+        ```yaml
+        event: 
+          name: example:event
+          version: 1
+        ```
 
 * #### validation
 
-    **payload**: Contains the data passed through the request _(required)_  
-    **identity**: Identifies the source of the event _(not required)_  
-    **metadata**: Contains data that is informative but not used in the business rule _(not required)_ 
+    - **payload**: Contains the data passed through the request _(required)_  
+    - **identity**: Identifies the source of the event _(not required)_  
+    - **metadata**: Contains data that is informative but not used in the business rule _(not required)_ 
     
-    ```yaml
-    validation:
-     payload:
-       users:
-         of: array($User)
-     identity:
-       userId:
-         of: long
-         is:
-           - required
-     metadata:
-       origin:
-         of: string
-         is:
-           -  required
-    ```
+        ```yaml
+        validation:
+         payload:
+           users:
+             of: array($User)
+         identity:
+           userId:
+             of: long
+             is:
+               - required
+         metadata:
+           origin:
+             of: string
+             is:
+               -  required
+        ```
 
 ### Types
 
@@ -202,6 +202,35 @@ age:
    - required
    - encrypted
 ``` 
+
+
+Validator
+---
+
+The Validator module contains all the code used to check that an event respects a specified schema. 
+This lib is already called by Transport lib which is set with default settings to validate events before sending them.
+For example the schema and event defined below are a valid representation of the usage of the lib:
+
+### Usage
+
+```kotlin
+    val event: RequestEvent
+    
+    val S3BucketName = "s3.bucket.name"
+    val S3BucketRegion = "s3.bucket.region"
+    val s3SchemaRepository = S3SchemaRepository(S3BucketName, Regions.fromName(S3BucketRegion))
+    val eventValidator = EventValidator(schemaRepository)
+    
+    val validationResult = eventValidator.validate(event)
+    
+    if (validationResult.validationSuccess) {
+        //success
+    }
+    else
+        val errors: List<Throwable> = validationResult.validationErrors
+    
+    val encryptedFieldsJsonPaths: List<String> = validationResult.encryptedFields
+```
 
 Transport
 ---
