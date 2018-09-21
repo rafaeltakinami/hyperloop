@@ -1,0 +1,54 @@
+schema:
+  version: 1
+
+event:
+  name: insert:statement
+  version: 1
+
+types:
+
+validation:
+  payload:
+    id:
+      of: long
+      is:
+        - required
+    bank_id:
+      of: long
+      is:
+        - required
+    statement_status:
+      of: string
+      is:
+        - required
+    statement_type:
+      of: string
+      is:
+        - required
+    name:
+      of: string
+      is:
+        - required
+    created:
+      of: string
+      is:
+        - required
+    modified:
+      of: string
+      is:
+        - required
+    user_account_id:
+      of: long
+      is:
+        - required
+    
+  identity:
+    userId:
+      of: long
+      is:
+        - required
+  metadata:
+    origin:
+      of: string
+      is:
+        - required

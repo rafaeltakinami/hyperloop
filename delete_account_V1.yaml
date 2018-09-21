@@ -1,0 +1,26 @@
+schema:
+  version: 1
+
+event:
+  name: delete:account
+  version: 1
+
+types:
+
+validation:
+  payload:
+    id:
+      of: long
+      is:
+        - required
+    
+  identity:
+    userId:
+      of: long
+      is:
+        - required
+  metadata:
+    origin:
+      of: string
+      is:
+        - required

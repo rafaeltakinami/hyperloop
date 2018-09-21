@@ -1,0 +1,109 @@
+schema:
+    version: 1
+    
+event:
+    name: get:ran:generated:content
+    version: 1
+    
+types:
+  $card:
+    userCardId:
+      of: string
+      is:
+        - required
+    id:
+      of: string
+      is:
+        - required
+    cardId:
+      of: long
+      is:
+        - required
+    message_type:
+      of: string
+      is:
+        - required
+    title:
+      of: string
+        - encrypted
+      is:
+        - required
+    body:
+      of: string
+        - encrypted
+      is:
+        - required
+    action_text:
+      of: string
+        - encrypted
+      is:
+        - required
+    link:
+      of: string
+      is:
+        - required
+    template:
+      of: string
+      is:
+        - required
+    segment:
+      of: $segment
+      is:
+        - required
+      
+  $segment:
+    id:
+      of: long
+      is:
+        - required
+    modelName:
+      of: string
+      is:
+        - required
+    modelOutput:
+      of: string
+      is:
+        - required
+    intention:
+      of: string
+      is:
+        - required
+
+validation:
+  payload:
+    name:
+      of: string
+      is:
+        - required
+    flowId:
+      of: string
+      is:
+        - required
+    userId:
+      of: long
+      is:
+        - required
+    createdAt:
+      of: date(yyyy-MM-dd HH:mm:ss)
+      is:
+        - required
+    cards:
+      of: array($card)
+      is:
+        - required
+    onControlGroup:
+      of: boolean
+      is:
+        - required
+    sessionId:
+      of: string
+      is:
+        - required
+    device:
+      of: string
+      is:
+        - required
+    version:
+      of: long
+      is:
+        - required

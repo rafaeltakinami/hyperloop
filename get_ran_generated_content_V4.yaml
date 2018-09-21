@@ -1,0 +1,183 @@
+schema:
+  version: 1
+
+event:
+  name: get:ran:generated:content
+  version: 4
+
+types:
+  $card:
+    userCardId:
+      of: string
+      is:
+        - required
+    id:
+      of: string
+    cardId:
+      of: string
+      is:
+        - required
+    template:
+      of: string
+      is:
+        - required
+    segment:
+      of: $segment
+      is:
+        - required
+    card_data:
+      of: $card_data
+      is:
+        - required
+
+  $segment:
+    id:
+      of: long
+      is:
+        - required
+    modelName:
+      of: string
+      is:
+        - required
+    modelOutput:
+      of: string
+      is:
+        - required
+    intention:
+      of: string
+      is:
+        - required
+
+  $card_data:
+    title:
+      of: string
+        - encrypted
+      is:
+        - required
+    body:
+      of: string
+        - encrypted
+      is:
+        - required
+    link:
+      of: string
+    action_text:
+      of: string
+        - encrypted      
+    bigNumber:
+      of: string
+    image:
+      of: string
+    barChart:
+      of: $bar_chart
+    feedback:
+      of: $feedback
+    negativeFeedback:
+      of: $negative_feedback
+    afterInteraction:
+      of: $after_interaction
+    alternatives:
+      of: array($alternative)
+
+  $bar_chart:
+    coordinates:
+      of: array($coordinate)
+      is:
+        - required
+
+  $coordinate:
+   x:
+    of: string
+    is:
+      - required
+   yValue:
+    of: double
+    is:
+      - required
+   yText:
+    of: string
+    is:
+      - required
+
+  $feedback:
+   title:
+    of: string
+    is:
+      - required
+   body:
+    of: string
+    is:
+      - required
+
+  $negative_feedback:
+   title: 
+    of: string
+    is:
+      - required
+   body: 
+    of: string
+    is:
+      - required
+
+  $after_interaction:
+   title: 
+    of: string
+    is:
+      - required
+   body: 
+    of: string
+    is:
+      - required
+   action_text: 
+    of: string
+   link: 
+    of: string
+    
+  $alternative:
+    answer: 
+     of: string
+     is:
+       - required
+    value: 
+     of: boolean
+    percentage: 
+     of: string
+
+validation:
+  payload:
+    name:
+      of: string
+      is:
+        - required
+    flowId:
+      of: string
+      is:
+        - required
+    userId:
+      of: long
+      is:
+        - required
+    createdAt:
+      of: date(yyyy-MM-dd HH:mm:ss)
+      is:
+        - required
+    cards:
+      of: array($card)
+      is:
+        - required
+    sessionId:
+      of: string
+      is:
+        - required
+    device:
+      of: string
+      is:
+        - required
+    version:
+      of: long
+      is:
+        - required
+    tag:
+      of: string
+      is:
+        - required

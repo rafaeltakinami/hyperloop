@@ -1,0 +1,50 @@
+schema:
+  version: 1
+
+event:
+  name: insert:account
+  version: 1
+
+types:
+
+validation:
+  payload:
+    id:
+      of: long
+      is:
+        - required
+    bank_id:
+      of: long
+      is:
+        - required
+    account_status:
+      of: string
+      is:
+        - required
+    account_type:
+      of: string
+      is:
+        - required
+    name:
+      of: string
+      is:
+        - required
+    account_connection_type:
+      of: string
+      is:
+        - required
+    created:
+      of: string
+      is:
+        - required
+    
+  identity:
+    userId:
+      of: long
+      is:
+        - required
+  metadata:
+    origin:
+      of: string
+      is:
+        - required

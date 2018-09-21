@@ -1,0 +1,47 @@
+schema:
+  version: 1
+
+event:
+  name: insert:device
+  version: 1
+
+types:
+
+validation:
+  payload:
+    id:
+      of: long
+      is:
+        - required
+    created:
+      of: date(yyyy-MM-dd HH:mm:ss Z)
+      is:
+        - required
+    name:
+      of: string
+      is:
+        - required
+        - encrypted
+    operating_system:
+      of: string
+      is:
+        - required
+    token:
+      of: string
+      is:
+        - required
+    push_notification_token:
+      of: string
+
+  identity:
+    userId:
+      of: long
+      is:
+        - required
+
+  metadata:
+    origin:
+        of: string
+        is:
+          - required
+

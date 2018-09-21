@@ -1,0 +1,63 @@
+schema:
+ version: 1
+
+event: 
+  name: user:simulate:put
+  version: 1
+
+types:
+ $offer:
+   offerRisk:
+     of: string
+   financialEntity: 
+     of: string
+     is:
+       - required
+   monthlyCET: 
+     of: double
+     is:
+       - required
+   nominalRate: 
+     of: double
+     is:
+       - required
+   amount: 
+     of: double
+     is:
+       - required
+   installments: 
+     of: int
+     is:
+       - required
+   installmentAmount: 
+     of: double
+     is:
+       - required
+
+
+validation:
+ payload:
+   simulatedAt:
+     of: string
+     is:
+       - required
+   maxAmount:
+     of: double
+     is: 
+       - required
+   offers: 
+     of: array($offer)
+   updatedOffers: 
+     of: boolean
+     is:
+       - required
+ identity:
+   userId:
+     of: long
+     is:
+      - required
+ metadata:
+   origin:
+     of: string
+     is:
+      - required

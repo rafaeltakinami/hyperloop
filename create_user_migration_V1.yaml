@@ -1,0 +1,50 @@
+schema:
+  version: 1
+
+event:
+  name: create:user:migration
+  version: 1
+
+types:
+
+validation:
+  payload:
+    userId:
+      of: long
+      is:
+        - required
+    name:
+      of: string
+      is:
+        - required
+    email:
+      of: string
+      is:
+        - required
+    phone:
+      of: string
+    origin:
+      of: string
+      is:
+        - required
+    optedIn:
+      of: boolean
+      is:
+        - required
+    createdReal:
+      of: long
+    userType:
+      of: int
+      is:
+        - required
+
+  identity:
+    userId:
+      of: long
+      is:
+        - required
+  metadata:
+    origin:
+      of: string
+      is:
+        - required
