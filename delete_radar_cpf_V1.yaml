@@ -1,0 +1,19 @@
+schema:
+  version: 1
+
+event:
+  name: delete:radar:cpf
+  version: 1
+
+types:
+
+validation:
+  payload:
+    radar_cpf_id:
+      of: long
+      is:
+        - required
+    deleted:
+      of: boolean
+      is:
+        - required
