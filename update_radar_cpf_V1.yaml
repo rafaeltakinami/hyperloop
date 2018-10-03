@@ -1,0 +1,19 @@
+schema:
+  version: 1
+
+event:
+  name: update:radar:cpf
+  version: 1
+
+types:
+
+validation:
+  payload:
+    radar_cpf_id:
+      of: long
+      is:
+        - required
+    cp_acceptance_date:
+      of: date(yyyy-MM-dd HH:mm:ss Z)
+      is:
+        - required
