@@ -13,7 +13,3 @@ validation:
       of: long
       is:
         - required
-    deleted:
-      of: boolean
-      is:
-        - required
