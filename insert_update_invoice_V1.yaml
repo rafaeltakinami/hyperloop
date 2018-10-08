@@ -1,0 +1,37 @@
+schema:
+  version: 1
+
+event:
+  name: insert:update:invoice
+  version: 1
+
+types:
+
+validation:
+  payload:
+    invoice_id:
+      of: long
+      is:
+        - required
+    invoice_due_date:
+      of: date(yyyy-MM-dd HH:mm:ss Z)
+      is:
+        - required
+    credit_card_id:
+      of: long
+      is:
+	- required
+    credit_card_name:
+      of: string
+      is:
+	- required
+    credit_card_final_numbers:
+      of: string
+    bank_id:
+      of: long
+      is:
+	- required
+    bank_name:
+      of: string
+      is:
+	- required
