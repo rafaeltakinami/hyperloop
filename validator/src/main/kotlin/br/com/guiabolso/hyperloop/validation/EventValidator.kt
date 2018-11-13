@@ -9,6 +9,7 @@ import br.com.guiabolso.hyperloop.schemas.SchemaKey
 import br.com.guiabolso.hyperloop.schemas.SchemaRepository
 import br.com.guiabolso.hyperloop.validation.types.ArrayType
 import br.com.guiabolso.hyperloop.validation.types.DateType
+import br.com.guiabolso.hyperloop.validation.types.MapType
 import br.com.guiabolso.hyperloop.validation.types.PrimitiveType
 import br.com.guiabolso.hyperloop.validation.types.SchemaNodeTypeParser
 import br.com.guiabolso.hyperloop.validation.types.SchemaType
@@ -18,6 +19,7 @@ import com.fasterxml.jackson.databind.node.TextNode
 import com.google.gson.JsonArray
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
+import com.google.gson.JsonPrimitive
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import kotlin.collections.MutableMap.MutableEntry
@@ -119,6 +121,7 @@ class EventValidator(
             when (schemaType) {
                 is ArrayType -> this.validateArrayElement(schemaNodeSpec, schemaType, inputNode, schemaData, validationResult, encryptedElementPath)
                 is DateType -> this.validateDateElement(schemaType, inputNode)
+                is MapType -> this.validateMapElement(schemaNodeSpec, schemaType, inputNode, schemaData, validationResult, encryptedElementPath)
                 is UserDefinedType -> {
                     if (isArrayElement)
                         encryptedElementPath.add("${schemaType.nodeKey}[*]")
@@ -172,6 +175,20 @@ class EventValidator(
         }
         arrayElement.asJsonArray.forEach {
             validateByType(schemaNodeSpec, type.contentType, schemaData, it, true, validationResult, encryptedElementPath)
+        }
+    }
+
+    private fun validateMapElement(
+            schemaNodeSpec: JsonNode,
+            type: MapType,
+            mapElement: JsonElement,
+            schemaData: SchemaData,
+            validationResult: ValidationResult,
+            encryptedElementPath: MutableList<String>
+    ) {
+        mapElement.asJsonObject.entrySet().forEach {
+            validateByType(schemaNodeSpec, type.key, schemaData, JsonPrimitive(it.key), false, validationResult, encryptedElementPath)
+            validateByType(schemaNodeSpec, type.value, schemaData, mapElement, false, validationResult, encryptedElementPath)
         }
     }
 

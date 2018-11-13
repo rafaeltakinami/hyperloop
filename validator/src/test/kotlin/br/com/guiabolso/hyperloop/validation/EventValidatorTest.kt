@@ -19,9 +19,15 @@ class EventValidatorTest {
     private lateinit var eventValidator: EventValidator
 
     private lateinit var schema: String
+    private lateinit var schemaWithMap: String
+    private lateinit var schemaWithMapStringString: String
+
     @Before
     fun setUp() {
         schema = loadSchemaFromFile("/schema.yml")
+        schemaWithMap = loadSchemaFromFile("/schema-with-map.yml")
+        schemaWithMap = loadSchemaFromFile("/schema-with-map.yml")
+        schemaWithMapStringString = loadSchemaFromFile("/string-string-map-schema.yml")
         mockSchemaRepository = mock()
         eventValidator = EventValidator(mockSchemaRepository)
     }
@@ -105,6 +111,97 @@ class EventValidatorTest {
     }
 
     @Test
+    fun `test successful validation with map`() {
+        val payload = """
+                        "users": [
+                            {
+                                "name": "Bruno",
+                                "birthdate": "01/01/1990",
+                                "gender": "male",
+                                "id": 1111111111,
+                                "married": false,
+                                "height": 2.111,
+                                "age": 28,
+                                "friend":
+                                {
+                                    "name": "Carlos",
+                                    "birthdate": "22/05/1990",
+                                    "gender": "male",
+                                    "id": 222222222,
+                                    "married": true,
+                                    "height": 3.111,
+                                    "age": 28
+                                }
+                            },
+                            {
+                                "name": "Carlos",
+                                "birthdate": "22/05/1990",
+                                "gender": "male",
+                                "id": 222222222,
+                                "married": true,
+                                "height": 3.111,
+                                "age": 28
+                            }
+                        ],
+                        "map": {
+                            "name": "Bardellinha",
+                            "birthdate": "22/05/1990",
+                            "gender": "male peitoral definido",
+                            "id": 222222222,
+                            "married": false,
+                            "height": 1000,
+                            "age": 28
+                        },
+                        "file": {
+                            "name": "file",
+                            "size": 123456.012456398725,
+                            "quantity": 1233456877895613,
+                            "owner": [
+                                {
+                                    "name": "Bruno",
+                                    "birthdate": "01/01/1990",
+                                    "gender": "male",
+                                    "id": 1111111111,
+                                    "married": false,
+                                    "height": 2.111,
+                                    "age": 28
+                                }
+                            ]
+                        },
+                        "name": "Thiago",
+                        "x": "Thiago",
+                        "y": "Thiago",
+                        "o": "Thiago",
+                        "k": "Thiago",
+                        "l": "Thiago"
+                """.trimIndent()
+
+        whenever(mockSchemaRepository.get(SchemaKey("event_test", 1))).thenReturn(schemaWithMap)
+        val response = eventValidator.validate(newEvent("event_test", 1, payload))
+        assertTrue(response.validationSuccess)
+        assertTrue(response.validationErrors.isEmpty())
+        assertTrue(response.encryptedFields.contains("$.payload.users[*].name"))
+        assertTrue(response.encryptedFields.contains("$.payload.users[*].friend.name"))
+        assertTrue(response.encryptedFields.contains("$.payload.file.name"))
+        assertTrue(response.encryptedFields.contains("$.payload.file.quantity"))
+        assertTrue(response.encryptedFields.contains("$.identity.userId"))
+        assertTrue(response.encryptedFields.contains("$.metadata.origin"))
+    }
+
+    @Test
+    fun `test successful validation with map integer to string`() {
+        val payload = """
+                        "map": {
+                            "1": "Bardellinha"
+                        }
+                """.trimIndent()
+
+        whenever(mockSchemaRepository.get(SchemaKey("event_test", 1))).thenReturn(schemaWithMapStringString)
+        val response = eventValidator.validate(newEvent("event_test", 1, payload))
+        assertTrue(response.validationSuccess)
+    }
+
+    @Test
     fun `test successful validation with null types `() {
         val schema = loadSchemaFromFile("/null_type_schema.yml")
         val payload = """
@@ -141,7 +238,7 @@ class EventValidatorTest {
                         "name": "Thiago"
                 """.trimIndent()
         val schema = loadSchemaFromFile("/null_identity_schema.yml")
-        val event = newEvent("event_test",1, payload)
+        val event = newEvent("event_test", 1, payload)
 
         whenever(mockSchemaRepository.get(SchemaKey("event_test", 1))).thenReturn(schema)
 
@@ -156,7 +253,7 @@ class EventValidatorTest {
                         "name": "Thiago"
                 """.trimIndent()
         val schema = loadSchemaFromFile("/null_metadata_schema.yml")
-        val event = newEvent("event_test",1, payload)
+        val event = newEvent("event_test", 1, payload)
 
         whenever(mockSchemaRepository.get(SchemaKey("event_test", 1))).thenReturn(schema)
 

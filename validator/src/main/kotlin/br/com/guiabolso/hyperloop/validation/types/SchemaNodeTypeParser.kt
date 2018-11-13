@@ -2,6 +2,7 @@ package br.com.guiabolso.hyperloop.validation.types
 
 import br.com.guiabolso.hyperloop.exceptions.WrongSchemaFormatException
 import br.com.guiabolso.hyperloop.model.SchemaData
+import br.com.guiabolso.hyperloop.validation.types.SchemaNodeTypeParser.notNull
 import com.fasterxml.jackson.databind.JsonNode
 
 object SchemaNodeTypeParser {
@@ -16,6 +17,10 @@ object SchemaNodeTypeParser {
         val attribute = if (groups.size > 1) {
             groups.last()
         } else null
+        return getType(type, nodeKey, attribute, schema, specNode)
+    }
+
+    private fun getType(type: String, nodeKey: String, attribute: String?, schema: SchemaData, specNode: JsonNode): SchemaType {
         return when (type.toLowerCase()) {
             "string", "long", "int", "float", "double", "boolean" -> PrimitiveType(nodeKey, type)
             "array" -> {
@@ -31,6 +36,16 @@ object SchemaNodeTypeParser {
                 ArrayType(nodeKey, arrayContentType)
             }
             "date" -> DateType(nodeKey, attribute.notNull("Date type should have one parameter"))
+            "map" -> {
+                val attrs = attribute.notNull("Map content type should not be null").split(",")
+
+                if (attrs[0] != "string") throw WrongSchemaFormatException("Illegal type $type. Map key must be string")
+
+                val key = getType(attrs[0], nodeKey, attribute, schema, specNode)
+                val value = getType(attrs[1], nodeKey, attribute, schema, specNode)
+
+                MapType(nodeKey, key, value)
+            }
             else -> if (isUserDefinedType(type, schema)) {
                 UserDefinedType(nodeKey, schema.types!!.get(type))
             } else {
