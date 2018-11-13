@@ -21,8 +21,21 @@ types:
       is:
         - required
     modelOutput:
+      of: $modelOutput
+      is:
+        - required
+  $modelOutput:
+    modelName:         
+      of: string
+      is:
+        - required
+    modelOutput:
+      of: string
+      is:
+        - required
+    extraData:
       of: map(Any,Any)
-
+         
 validation:
   payload:
     name:
