@@ -21,9 +21,7 @@ types:
       is:
         - required
     modelOutput:
-      of: //TODO
-      is:
-        - //TODO NOT REQUIRED
+      of: map(Any,Any)
 
 validation:
   payload:
@@ -44,10 +42,6 @@ validation:
       is:
         - required
     onModelControlGroup:
-      of: boolean
-      is:
-        - required
-    isFromBulldozer:
       of: boolean
       is:
         - required
