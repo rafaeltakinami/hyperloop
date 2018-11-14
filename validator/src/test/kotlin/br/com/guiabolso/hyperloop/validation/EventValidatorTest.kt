@@ -26,7 +26,6 @@ class EventValidatorTest {
     fun setUp() {
         schema = loadSchemaFromFile("/schema.yml")
         schemaWithMap = loadSchemaFromFile("/schema-with-map.yml")
-        schemaWithMap = loadSchemaFromFile("/schema-with-map.yml")
         schemaWithMapStringString = loadSchemaFromFile("/string-string-map-schema.yml")
         mockSchemaRepository = mock()
         eventValidator = EventValidator(mockSchemaRepository)
@@ -144,13 +143,24 @@ class EventValidatorTest {
                             }
                         ],
                         "map": {
-                            "name": "Bardellinha",
-                            "birthdate": "22/05/1990",
-                            "gender": "male peitoral definido",
-                            "id": 222222222,
-                            "married": false,
-                            "height": 1000,
-                            "age": 28
+                            "first": {
+                                    "name": "Carlos",
+                                    "birthdate": "22/05/1990",
+                                    "gender": "male",
+                                    "id": 222222222,
+                                    "married": true,
+                                    "height": 3.111,
+                                    "age": 28
+                            },
+                            "second": {
+                                    "name": "Carlos",
+                                    "birthdate": "22/05/1990",
+                                    "gender": "male",
+                                    "id": 222222222,
+                                    "married": true,
+                                    "height": 3.111,
+                                    "age": 28
+                            }
                         },
                         "file": {
                             "name": "file",
@@ -186,6 +196,9 @@ class EventValidatorTest {
         assertTrue(response.encryptedFields.contains("$.payload.file.quantity"))
         assertTrue(response.encryptedFields.contains("$.identity.userId"))
         assertTrue(response.encryptedFields.contains("$.metadata.origin"))
+        assertTrue(response.encryptedFields.contains("$.payload.map.name"))
+        assertTrue(response.encryptedFields.contains("$.payload.map.birthdate"))
+        assertTrue(response.encryptedFields.contains("$.payload.map.height"))
     }
 
     @Test
