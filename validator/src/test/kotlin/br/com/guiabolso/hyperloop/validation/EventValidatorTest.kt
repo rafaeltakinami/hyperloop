@@ -21,12 +21,14 @@ class EventValidatorTest {
     private lateinit var schema: String
     private lateinit var schemaWithMap: String
     private lateinit var schemaWithMapStringString: String
+    private lateinit var schemaWithEmptyMap: String
 
     @Before
     fun setUp() {
         schema = loadSchemaFromFile("/schema.yml")
         schemaWithMap = loadSchemaFromFile("/schema-with-map.yml")
         schemaWithMapStringString = loadSchemaFromFile("/string-string-map-schema.yml")
+        schemaWithEmptyMap = loadSchemaFromFile("/string-string-map-schema.yml")
         mockSchemaRepository = mock()
         eventValidator = EventValidator(mockSchemaRepository)
     }
@@ -212,6 +214,32 @@ class EventValidatorTest {
         whenever(mockSchemaRepository.get(SchemaKey("event_test", 1))).thenReturn(schemaWithMapStringString)
         val response = eventValidator.validate(newEvent("event_test", 1, payload))
         assertTrue(response.validationSuccess)
+    }
+
+    @Test
+    fun `test successful validation with empty map`() {
+        val payload = """
+                        "map": {}
+                """.trimIndent()
+
+        whenever(mockSchemaRepository.get(SchemaKey("event_test", 1))).thenReturn(schemaWithMapStringString)
+        val response = eventValidator.validate(newEvent("event_test", 1, payload))
+        assertTrue(response.validationSuccess)
+    }
+
+    @Test
+    fun `test failed validation with null map`() {
+        val payload = """
+                        "map": null
+                """.trimIndent()
+
+        whenever(mockSchemaRepository.get(SchemaKey("event_test", 1))).thenReturn(schemaWithMapStringString)
+
+        val response = eventValidator.validate(newEvent("event_test", 1, payload))
+
+        assertFalse(response.validationSuccess)
+        assertTrue(response.encryptedFields.contains("$.identity.userId"))
+        assertTrue(response.encryptedFields.contains("$.metadata.origin"))
     }
 
     @Test
