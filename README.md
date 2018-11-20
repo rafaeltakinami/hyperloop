@@ -8,13 +8,49 @@ Hyperloop is a simple library used to validate and send [events](https://github.
 
 The library is divided in 2 modules: validator and transport
 
-## Validator
 
-The Validator module contains all the code used to check that an event respects a specified schema. 
-This lib is already called by Transport lib which is set with default settings to validate events before sending them.
-For example the schema and event defined below are a valid representation of the usage of the lib:
 
-***schema:***
+Structure
+-
+
+#### Request Event
+```json
+{
+  "name": "example:event",
+  "version": 1,
+  "payload": {
+    "users": [
+      {
+        "name": "Thiago Bardella",
+        "birthdate": "22/05/1990",
+        "gender": "male"
+      },
+      {
+        "name": "Bruno Ortiz",
+        "birthdate": "15/02/1990",
+        "gender": "male"
+      }
+    ],
+    "file": {
+      "name": "document.png",
+      "owner": {
+        "name": "Thiago Bardella",
+        "birthdate": "22/05/1990",
+        "gender": "male"
+      }
+    }
+  },
+  "identity":{
+    "userId": 12345
+  },
+  "metadata":{
+    "origin": "system_xpto"
+  }
+}
+```
+
+#### Schema
+
 ```yaml
 schema:
  version: 1
@@ -60,41 +96,119 @@ validation:
       - required
 ```
 
-***event:***
-```json
-{
-  "name": "example:event",
-  "version": 1,
-  "payload": {
-    "users": [
-      {
-        "name": "Thiago Bardella",
-        "birthdate": "22/05/1990",
-        "gender": "male"
-      },
-      {
-        "name": "Bruno Ortiz",
-        "birthdate": "15/02/1990",
-        "gender": "male"
-      }
-    ],
-    "file": {
-      "name": "document.png",
-      "owner": {
-        "name": "Thiago Bardella",
-        "birthdate": "22/05/1990",
-        "gender": "male"
-      }
-    }
-  },
-  "identity":{
-    "userId": 12345
-  },
-  "metadata":{
-    "origin": "system_xpto"
-  }
-}
-```
+### Schema Properties
+
+
+* #### schema 
+
+    - **version**: version of the schema
+    
+        ```yaml
+        schema:
+          version: 1
+        ```
+
+* #### event
+
+    - **name**: Event name  
+    - **version**: Event version
+    
+        ```yaml
+        event: 
+          name: example:event
+          version: 1
+        ```
+
+* #### validation
+
+    - **payload**: Contains the data passed through the request _(required)_  
+    - **identity**: Identifies the source of the event _(not required)_  
+    - **metadata**: Contains data that is informative but not used in the business rule _(not required)_ 
+    
+        ```yaml
+        validation:
+         payload:
+           users:
+             of: array($User)
+         identity:
+           userId:
+             of: long
+             is:
+               - required
+         metadata:
+           origin:
+             of: string
+             is:
+               -  required
+        ```
+
+### Types
+
+Types exist to warranty that the passed parameter contains a valid value.
+
+##### Primitive types
+
+* string  
+* long  
+* int  
+* float  
+* double  
+* boolean
+
+Example: 
+```yaml
+name:
+ of: string
+```   
+
+##### Other types
+
+* date
+
+    Must be used always with the date format
+    ```yaml
+    birthdate:
+     of: date(yyyy-MM-dd HH:mm:ss)
+    ```    
+
+* array
+    ```yaml
+    grades:
+     of: array(float)
+    ```   
+
+* user types
+    ```yaml
+    user:
+     of: $User
+    ```
+
+#### Defining a Parameter Type
+
+To specify a parameter type, the key `of:` must be used passing one of the accepted types described above.
+
+#### Defining a Parameter as Required
+
+Once a parameter is defined as _required_, this parameter cannot be absent in the request, or hold the value `null`.
+
+#### Defining a Parameter as Encrypted
+
+A parameters can also be flagged as _encrypted_. This flag will not change the lib behavior.
+
+```yaml
+age:
+ of: string
+ is:
+   - required
+   - encrypted
+``` 
+
+Validator
+---
+
+The Validator module contains all the code used to check that an event respects a specified schema. 
+This lib is already called by Transport lib which is set with default settings to validate events before sending them.
+For example the schema and event defined below are a valid representation of the usage of the lib:
 
 ### Usage
 
@@ -115,11 +229,10 @@ validation:
         val errors: List<Throwable> = validationResult.validationErrors
     
     val encryptedFieldsJsonPaths: List<String> = validationResult.encryptedFields
-    
-    
 ```
 
-## Transport
+Transport
+---
 
 The transport module is used to validate and send the event to a specified destination. Currently the supported destination are:
 
