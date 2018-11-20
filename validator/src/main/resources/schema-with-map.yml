@@ -1,0 +1,70 @@
+schema:
+  version: 1
+
+event:
+  name: event_test
+  version: 1
+
+types:
+  $File:
+    owner:
+      of: array($User)
+    name:
+      of: string
+      is:
+      - encrypted
+    size:
+      of: double
+    quantity:
+      of: long
+      is:
+      - encrypted
+
+  $User:
+    name:
+      of: string
+      is:
+      - required
+      - encrypted
+    friend:
+      of: $User
+    birthdate:
+      of: date(yyyy/mm/dd)
+      is:
+      - required
+      - encrypted
+    gender:
+      of: string
+    height:
+      of: float
+      is:
+      - encrypted
+    age:
+      of: int
+
+validation:
+  payload:
+    users:
+      of: array($User)
+      is:
+      - required
+    map:
+      of: map(string,$User)
+    file:
+      of: $File
+    name:
+      of: string
+      is:
+      - required
+  identity:
+    userId:
+      of: long
+      is:
+      - required
+      - encrypted
+  metadata:
+    origin:
+      of: string
+      is:
+      - required
+      - encrypted

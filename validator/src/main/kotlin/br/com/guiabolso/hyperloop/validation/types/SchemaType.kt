@@ -21,6 +21,12 @@ class UserDefinedType(
         val userType: JsonNode
 ) : SchemaType()
 
+class MapType (
+        override val nodeKey: String,
+        val key: SchemaType,
+        val value: SchemaType
+) : SchemaType()
+
 class PrimitiveType(
         override val nodeKey: String,
         rawType: String

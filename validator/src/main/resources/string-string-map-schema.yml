@@ -1,0 +1,25 @@
+schema:
+  version: 1
+
+event:
+  name: event_test
+  version: 1
+
+types:
+
+validation:
+  payload:
+    map:
+      of: map(string,string)
+  identity:
+    userId:
+      of: long
+      is:
+      - required
+      - encrypted
+  metadata:
+    origin:
+      of: string
+      is:
+      - required
+      - encrypted
