@@ -34,7 +34,7 @@ types:
       is:
         - required
     extraData:
-      of: map(Any,Any)
+      of: map(string,string)
          
 validation:
   payload:
