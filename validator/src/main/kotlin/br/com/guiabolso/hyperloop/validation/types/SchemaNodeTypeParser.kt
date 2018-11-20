@@ -39,6 +39,7 @@ object SchemaNodeTypeParser {
             "map" -> {
                 val attrs = attribute.notNull("Map content type should not be null").split(",")
 
+                // TODO remove when other key types become accepted
                 if (attrs[0] != "string") throw WrongSchemaFormatException("Illegal type $type. Map key must be string")
 
                 val key = getType(attrs[0], nodeKey, attribute, schema, specNode)
