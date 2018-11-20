@@ -1,0 +1,52 @@
+schema:
+  version: 1
+
+event:
+  name: insert:ran:generate:content:models:data
+  version: 1
+
+types:
+
+  $cardIdentityAndSegment:
+    cardId:
+      of: long
+      is:
+        - required
+    template:
+      of: string
+      is:
+        - required
+    segmentId:
+      of: long
+      is:
+        - required
+    modelOutput:
+      of: $modelOutput
+      is:
+        - required
+  $modelOutput:
+    modelName:         
+      of: string
+      is:
+        - required
+    modelOutput:
+      of: string
+      is:
+        - required
+    extraData:
+      of: map(string,string)
+         
+validation:
+  payload:
+    createdAt:
+      of: date(yyyy-MM-dd HH:mm:ss)
+      is:
+        - required
+    onModelControlGroup:
+      of: boolean
+      is:
+        - required
+    cards:
+      of: array($cardIdentityAndSegment)
+      is:
+        - required
