@@ -22,10 +22,9 @@ types:
         - required
     modelOutput:
       of: $modelOutput
-      is:
-        - required
+
   $modelOutput:
-    modelName:         
+    modelName:
       of: string
       is:
         - required
@@ -35,7 +34,7 @@ types:
         - required
     extraData:
       of: map(string,string)
-         
+
 validation:
   payload:
     createdAt:
