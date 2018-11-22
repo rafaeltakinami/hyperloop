@@ -8,6 +8,11 @@ event:
 types:
 
 validation:
+  payload:
+    created:
+      of: date(yyyy-MM-dd HH:mm:ss)
+      is:
+        - required
   identity:
     userIds:
       of: array(long)
