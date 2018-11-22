@@ -49,6 +49,14 @@ Structure
 }
 ```
 
+PS.: Validator module now is prepared for also accepting a list of userIds under "identity" tag:
+
+```json
+"identity":{
+    "userIds": [1, 2, 3, 4]
+  }
+```
+
 #### Schema
 
 ```yaml
@@ -203,14 +211,41 @@ age:
    - encrypted
 ``` 
 
-Validator
----
+Modules
+-
+
+The two main modules of Hyperloop are:
+- Validator
+- Transport
+
+and to use any of these modules in your own Project you must first include the following settings inside your build.gradle file:
+
+```
+repositories {
+    mavenCentral()
+    jcenter()
+}
+
+```
+
+and the following dependencies:
+
+```
+compile 'br.com.guiabolso:hyperloop-transport:1.4.0'
+compile 'br.com.guiabolso:hyperloop-validator:1.4.0'
+```
+
+### Validator
+
 
 The Validator module contains all the code used to check that an event respects a specified schema. 
 This lib is already called by Transport lib which is set with default settings to validate events before sending them.
 For example the schema and event defined below are a valid representation of the usage of the lib:
 
-### Usage
+- ### Usage
+
+
+
 
 ```kotlin
     val event: RequestEvent
@@ -231,23 +266,30 @@ For example the schema and event defined below are a valid representation of the
     val encryptedFieldsJsonPaths: List<String> = validationResult.encryptedFields
 ```
 
-Transport
----
+### Transport
+
 
 The transport module is used to validate and send the event to a specified destination. Currently the supported destination are:
 
 * AWS SQS
+* AWS Firehose
 
-### Usage
+- ### Usage
 
 ```kotlin
 val event = ...
-val sqsTransport = SQSTransport(sqs, "queue-url")
-val hyperloop = Hyperloop(sqsTransport, NoOpCryptographyEngine())
+val sqsTransport = SQSTransport(
+        System.getenv("ORC-QUEUE"),
+        Regions.fromName(System.getenv("ORC-REGION"))
+val hyperloop = Hyperloop(sqsTransport)
 
 val result = hyperloop.offer(event)
 println("Message id: ${result.messageId}")
 ```
 
-The Hyperloop class receives to interfaces as parameters, the first is the transport that it will use to send the event
-the later one is the cryptography engine that it will be used to encrypt any data sent by the transport.
+Considering the following Environment Variables:
+```
+ORC-QUEUE: https://sqs.sa-east-1.amazonaws.com/744617668409/orc
+ORC-REGION: sa-east-1
+```
+

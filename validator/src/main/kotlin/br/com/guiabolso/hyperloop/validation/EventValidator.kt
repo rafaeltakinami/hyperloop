@@ -7,6 +7,7 @@ import br.com.guiabolso.hyperloop.schemas.CachedSchemaRepository
 import br.com.guiabolso.hyperloop.schemas.SchemaDataRepository
 import br.com.guiabolso.hyperloop.schemas.SchemaKey
 import br.com.guiabolso.hyperloop.schemas.SchemaRepository
+import br.com.guiabolso.hyperloop.utils.allNull
 import br.com.guiabolso.hyperloop.validation.types.ArrayType
 import br.com.guiabolso.hyperloop.validation.types.DateType
 import br.com.guiabolso.hyperloop.validation.types.MapType
@@ -59,8 +60,19 @@ class EventValidator(
         }
 
         val eventIdentityContent = event.identity
-        val userId = eventIdentityContent.asJsonObject["userId"]
-        userId?: validationResult.validationErrors.add(InvalidInputException("Element 'userId' is required"))
+
+        val userId = eventIdentityContent.asJsonObject["userId"]?.let{ id ->
+            if (id !is JsonPrimitive)
+                validationResult.validationErrors.add(InvalidInputException("Element 'userId' must be a JsonPrimitive"))
+        }
+
+        val userIds = eventIdentityContent.asJsonObject["userIds"]?.let{ ids ->
+            if(ids !is JsonArray)
+                validationResult.validationErrors.add(InvalidInputException("Element 'userIds' must be a JsonArray"))
+        }
+
+        if (allNull(userId, userIds))
+            validationResult.validationErrors.add(InvalidInputException("Identity must have 'userId' or 'userIds'"))
 
         schemaData.validation["identity"]?.fields()?.let { schemaIdentitySpec ->
             encryptedElementPath.clear()
