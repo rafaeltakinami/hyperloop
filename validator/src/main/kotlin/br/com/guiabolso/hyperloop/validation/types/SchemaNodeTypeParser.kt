@@ -25,7 +25,7 @@ object SchemaNodeTypeParser {
             "string", "long", "int", "float", "double", "boolean" -> PrimitiveType(nodeKey, type)
             "array" -> {
                 val arrayContentType = when (attribute) {
-                    "string", "long", "int", "float", "double", "boolean" -> PrimitiveType(nodeKey, type)
+                    "string", "long", "int", "float", "double", "boolean" -> PrimitiveType(nodeKey, attribute)
                     "date" -> DateType(nodeKey, attribute)
                     else -> if (isUserDefinedType(attribute.notNull("Array content type should not be null"), schema)) {
                         UserDefinedType(nodeKey, schema.types!!.get(attribute))

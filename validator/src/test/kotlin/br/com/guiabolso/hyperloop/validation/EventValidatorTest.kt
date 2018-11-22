@@ -26,6 +26,7 @@ class EventValidatorTest {
     private lateinit var schemaWithNullMetadata: String
     private lateinit var schemaWithNullPayload: String
     private lateinit var schemaWithNullType: String
+    private lateinit var schemaWithUserIds: String
 
     @Before
     fun setUp() {
@@ -37,6 +38,7 @@ class EventValidatorTest {
         schemaWithNullMetadata = loadSchemaFromFile("/null_metadata_schema.yml")
         schemaWithNullPayload = loadSchemaFromFile("/null_payload_schema.yml")
         schemaWithNullType = loadSchemaFromFile("/null_type_schema.yml")
+        schemaWithUserIds = loadSchemaFromFile("/identity-userIds-schema.yml")
 
         mockSchemaRepository = mock()
         eventValidator = EventValidator(mockSchemaRepository)
@@ -296,16 +298,13 @@ class EventValidatorTest {
 
     @Test
     fun `test successfull validation with userId and userIds`() {
-        val payload = """
-                        "name": "Thiago"
-                """.trimIndent()
         val identity = """
                         "userId": 1,
                         "userIds": [1, 2, 3]
         """.trimIndent()
-        val event = newEvent("event_test", 1, payload, identity)
+        val event = newEvent("event_test", 1, "", identity)
 
-        whenever(mockSchemaRepository.get(SchemaKey("event_test", 1))).thenReturn(schemaWithNullIdentity)
+        whenever(mockSchemaRepository.get(SchemaKey("event_test", 1))).thenReturn(schemaWithUserIds)
 
         val response = eventValidator.validate(event)
 
