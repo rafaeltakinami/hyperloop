@@ -1,0 +1,15 @@
+schema:
+  version: 1
+
+event:
+  name: register:cpf:daily:changes
+  version: 1
+
+types:
+
+validation:
+  identity:
+    userIds:
+      of: array(long)
+      is:
+        - required
