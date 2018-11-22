@@ -22,6 +22,10 @@ class EventValidatorTest {
     private lateinit var schemaWithMap: String
     private lateinit var schemaWithMapStringString: String
     private lateinit var schemaWithEmptyMap: String
+    private lateinit var schemaWithNullIdentity: String
+    private lateinit var schemaWithNullMetadata: String
+    private lateinit var schemaWithNullPayload: String
+    private lateinit var schemaWithNullType: String
 
     @Before
     fun setUp() {
@@ -29,6 +33,11 @@ class EventValidatorTest {
         schemaWithMap = loadSchemaFromFile("/schema-with-map.yml")
         schemaWithMapStringString = loadSchemaFromFile("/string-string-map-schema.yml")
         schemaWithEmptyMap = loadSchemaFromFile("/string-string-map-schema.yml")
+        schemaWithNullIdentity = loadSchemaFromFile("/null_identity_schema.yml")
+        schemaWithNullMetadata = loadSchemaFromFile("/null_metadata_schema.yml")
+        schemaWithNullPayload = loadSchemaFromFile("/null_payload_schema.yml")
+        schemaWithNullType = loadSchemaFromFile("/null_type_schema.yml")
+
         mockSchemaRepository = mock()
         eventValidator = EventValidator(mockSchemaRepository)
     }
@@ -244,13 +253,12 @@ class EventValidatorTest {
 
     @Test
     fun `test successful validation with null types `() {
-        val schema = loadSchemaFromFile("/null_type_schema.yml")
         val payload = """
                         "name": "Thiago",
                         "x": "Thiago",
                         "y": "Thiago"
                 """.trimIndent()
-        whenever(mockSchemaRepository.get(SchemaKey("event_test", 1))).thenReturn(schema)
+        whenever(mockSchemaRepository.get(SchemaKey("event_test", 1))).thenReturn(schemaWithNullType)
         val response = eventValidator.validate(newEvent("event_test", 1, payload))
         assertTrue(response.validationSuccess)
         assertTrue(response.validationErrors.isEmpty())
@@ -262,9 +270,8 @@ class EventValidatorTest {
         val payload = """
                         "name": "Thiago"
                 """.trimIndent()
-        val schema = loadSchemaFromFile("/null_payload_schema.yml")
         val event = newEvent("event_test", 1, payload)
-        whenever(mockSchemaRepository.get(SchemaKey("event_test", 1))).thenReturn(schema)
+        whenever(mockSchemaRepository.get(SchemaKey("event_test", 1))).thenReturn(schemaWithNullPayload)
         val expectedErrors = mutableListOf<Throwable>(
                 InvalidInputException("Event has non-empty payload but the schema has no specification"))
         val response = eventValidator.validate(event)
@@ -278,10 +285,9 @@ class EventValidatorTest {
         val payload = """
                         "name": "Thiago"
                 """.trimIndent()
-        val schema = loadSchemaFromFile("/null_identity_schema.yml")
         val event = newEvent("event_test", 1, payload)
 
-        whenever(mockSchemaRepository.get(SchemaKey("event_test", 1))).thenReturn(schema)
+        whenever(mockSchemaRepository.get(SchemaKey("event_test", 1))).thenReturn(schemaWithNullIdentity)
 
         val response = eventValidator.validate(event)
 
@@ -289,14 +295,69 @@ class EventValidatorTest {
     }
 
     @Test
+    fun `test successfull validation with userId and userIds`() {
+        val payload = """
+                        "name": "Thiago"
+                """.trimIndent()
+        val identity = """
+                        "userId": 1,
+                        "userIds": [1, 2, 3]
+        """.trimIndent()
+        val event = newEvent("event_test", 1, payload, identity)
+
+        whenever(mockSchemaRepository.get(SchemaKey("event_test", 1))).thenReturn(schemaWithNullIdentity)
+
+        val response = eventValidator.validate(event)
+
+        assertTrue(response.validationSuccess)
+    }
+
+    @Test
+    fun `test event with userId as non JsonPrimitive`() {
+        val payload = """
+                        "name": "Thiago"
+                """.trimIndent()
+        val identity = """
+                        "userId": {}
+        """.trimIndent()
+        val event = newEvent("event_test", 1, payload, identity)
+
+        whenever(mockSchemaRepository.get(SchemaKey("event_test", 1))).thenReturn(schemaWithNullIdentity)
+        val expectedErrors = mutableListOf<Throwable>(
+                InvalidInputException("Element 'userId' must be a JsonPrimitive"))
+        val response = eventValidator.validate(event)
+
+        assertFalse(response.validationSuccess)
+        assertTrue(expectedErrors[0].message == response.validationErrors.elementAt(0).message)
+    }
+
+    @Test
+    fun `test event with userIds as non JsonArray`() {
+        val payload = """
+                        "name": "Thiago"
+                """.trimIndent()
+        val identity = """
+                        "userIds": 2
+        """.trimIndent()
+        val event = newEvent("event_test", 1, payload, identity)
+
+        whenever(mockSchemaRepository.get(SchemaKey("event_test", 1))).thenReturn(schemaWithNullIdentity)
+        val expectedErrors = mutableListOf<Throwable>(
+                InvalidInputException("Element 'userIds' must be a JsonArray"))
+        val response = eventValidator.validate(event)
+
+        assertFalse(response.validationSuccess)
+        assertTrue(expectedErrors[0].message == response.validationErrors.elementAt(0).message)
+    }
+
+    @Test
     fun `test event with origin but no metadata specification`() {
         val payload = """
                         "name": "Thiago"
                 """.trimIndent()
-        val schema = loadSchemaFromFile("/null_metadata_schema.yml")
         val event = newEvent("event_test", 1, payload)
 
-        whenever(mockSchemaRepository.get(SchemaKey("event_test", 1))).thenReturn(schema)
+        whenever(mockSchemaRepository.get(SchemaKey("event_test", 1))).thenReturn(schemaWithNullMetadata)
 
         val response = eventValidator.validate(event)
 
@@ -305,13 +366,13 @@ class EventValidatorTest {
 
     @Test
     fun `test event with no userId nor origin`() {
-        val schema = loadSchemaFromFile("/null_type_schema.yml")
         val event = newEvent("event_test", 1, "")
         event.metadata.remove("origin")
         event.identity.remove("userId")
-        whenever(mockSchemaRepository.get(SchemaKey("event_test", 1))).thenReturn(schema)
+        whenever(mockSchemaRepository.get(SchemaKey("event_test", 1))).thenReturn(schemaWithNullType)
         val expectedErrors = mutableListOf<Throwable>(
                 InvalidInputException("Element 'name' is required"),
+                InvalidInputException("Identity must have 'userId' or 'userIds'"),
                 InvalidInputException("Element 'userId' is required"),
                 InvalidInputException("Element 'origin' is required"))
         val response = eventValidator.validate(event)
@@ -320,6 +381,7 @@ class EventValidatorTest {
         assertTrue(expectedErrors[0].message == response.validationErrors.elementAt(0).message)
         assertTrue(expectedErrors[1].message == response.validationErrors.elementAt(1).message)
         assertTrue(expectedErrors[2].message == response.validationErrors.elementAt(2).message)
+        assertTrue(expectedErrors[3].message == response.validationErrors.elementAt(3).message)
     }
 
     @Test
@@ -354,9 +416,12 @@ class EventValidatorTest {
         assertTrue(response.validationErrors.first().message == "The event version '3' is different from schema '1'")
     }
 
-    private fun newEvent(eventName: String, eventVersion: Int, payload: String): RequestEvent {
-        val identity = JsonObject()
-        identity.addProperty("userId", 1)
+    private fun newEvent(
+            eventName: String,
+            eventVersion: Int,
+            payload: String,
+            identity: String? = """ "userId": 1 """
+            ): RequestEvent {
 
         val metadata = JsonObject()
         metadata.addProperty("origin", "origin")
@@ -369,7 +434,9 @@ class EventValidatorTest {
                 JsonParser().parse("""{
                         $payload
                 }"""),
-                identity,
+                JsonParser().parse("""{
+                        $identity
+                }""").asJsonObject,
                 JsonObject(),
                 metadata
         )
