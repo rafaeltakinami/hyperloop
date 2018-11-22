@@ -20,7 +20,7 @@ types:
       of: long
       is:
         - required
-    modelOutput:
+    modelsOutput:
       of: $modelOutput
 
   $modelOutput:
