@@ -1,0 +1,15 @@
+schema:
+  version: 1
+
+event:
+  name: event_test
+  version: 1
+
+types:
+
+validation:
+  identity:
+    userIds:
+      of: array(long)
+      is:
+      - required
