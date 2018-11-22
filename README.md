@@ -279,8 +279,8 @@ The transport module is used to validate and send the event to a specified desti
 ```kotlin
 val event = ...
 val sqsTransport = SQSTransport(
-        System.getenv("ORC-QUEUE"),
-        Regions.fromName(System.getenv("ORC-REGION"))
+        System.getenv("DESTINATION-QUEUE"),
+        Regions.fromName(System.getenv("DESTINATION-REGION"))
 val hyperloop = Hyperloop(sqsTransport)
 
 val result = hyperloop.offer(event)
@@ -289,7 +289,7 @@ println("Message id: ${result.messageId}")
 
 Considering the following Environment Variables:
 ```
-ORC-QUEUE: https://sqs.sa-east-1.amazonaws.com/744617668409/orc
-ORC-REGION: sa-east-1
+DESTINATION-QUEUE: "aws-destination-queue-endpoint"
+DESTINATION-REGION: "aws-destination-queue-region"
 ```
 
