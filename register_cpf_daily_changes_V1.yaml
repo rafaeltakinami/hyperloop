@@ -10,7 +10,7 @@ types:
 validation:
   payload:
     date:
-      of: date(yyyy-MM-dd HH:mm:ss)
+      of: date(yyyy-MM-dd HH:mm:ss Z)
       is:
         - required
   identity:
