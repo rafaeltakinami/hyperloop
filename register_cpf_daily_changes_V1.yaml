@@ -9,7 +9,7 @@ types:
 
 validation:
   payload:
-    created:
+    date:
       of: date(yyyy-MM-dd HH:mm:ss)
       is:
         - required
