@@ -12,40 +12,44 @@ validation:
     name:
       of: string
       is:
-      - required
+        - required
+        - encrypted
     email:
       of: string
       is:
-      - required
+        - required
+        - encrypted
     phone:
       of: string
+      is:
+        - encrypted
     origin:
       of: string
       is:
-      - required
+        - required
     optedIn:
       of: boolean
     userType:
       of: string
       is:
-      - required
+        - required
     createdReal:
       of: long
       is:
-      - required
+        - required
     mobileUserId:
       of: string
       is:
-      - required
+        - required
       
   identity:
     userId:
       of: long
       is:
-      - required
+        - required
 
   metadata:
     origin:
       of: string
       is:
-      - required
+        - required
