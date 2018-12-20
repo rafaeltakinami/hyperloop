@@ -3,16 +3,12 @@ schema:
   
 event:
   name: user:login
-  version: 1
+  version: 2
   
 types:
 
 validation:
   payload:
-    userId:
-      of: long
-      is:
-        - required
     name:
       of: string
       is:
