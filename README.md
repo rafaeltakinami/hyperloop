@@ -78,7 +78,7 @@ types:
      of: string
      is:
        - required
-       - encripted
+       - encrypted
    birthdate:
      of: date(yyyy/mm/dd)
      is:
