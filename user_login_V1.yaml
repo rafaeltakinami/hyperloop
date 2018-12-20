@@ -1,0 +1,63 @@
+schema:
+  version: 1
+  
+event:
+  name: user:login
+  version: 1
+  
+types:
+
+validation:
+  payload:
+    userId:
+      of: long
+      is:
+      - required
+    name:
+      of: string
+      is:
+      - required
+    email:
+      of: string
+      is:
+      - required
+    phone:
+      of: string
+    origin:
+      of: string
+      is:
+      - required
+    optedIn:
+      of: boolean
+    userType:
+      of: string
+      is:
+      - required
+    createdReal:
+      of: long
+      is:
+      - required
+    appKey:
+      of: string
+      is:
+      - required
+    channelId:
+      of: string
+      is:
+      - required
+    mobileUserId:
+      of: string
+      is:
+      - required
+      
+  identity:
+    userId:
+      of: long
+      is:
+        - required
+
+  metadata:
+    origin:
+        of: string
+        is:
+          - required
