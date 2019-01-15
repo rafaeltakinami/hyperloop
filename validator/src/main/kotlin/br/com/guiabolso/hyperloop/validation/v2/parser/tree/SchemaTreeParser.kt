@@ -1,7 +1,7 @@
-package br.com.guiabolso.hyperloop.schemas.parser.tree
+package br.com.guiabolso.hyperloop.validation.v2.parser.tree
 
-import br.com.guiabolso.hyperloop.validation.v1.PrimitiveTypes
-import br.com.guiabolso.hyperloop.validation.v1.PrimitiveTypes.STRING
+import br.com.guiabolso.hyperloop.validation.PrimitiveTypes
+import br.com.guiabolso.hyperloop.validation.PrimitiveTypes.STRING
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.ArrayNode

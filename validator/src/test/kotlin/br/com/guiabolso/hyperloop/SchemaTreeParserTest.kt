@@ -1,7 +1,7 @@
 package br.com.guiabolso.hyperloop
 
-import br.com.guiabolso.hyperloop.schemas.parser.tree.SchemaTreeParser
-import br.com.guiabolso.hyperloop.validation.v1.PrimitiveTypes
+import br.com.guiabolso.hyperloop.validation.v2.parser.tree.SchemaTreeParser
+import br.com.guiabolso.hyperloop.validation.PrimitiveTypes
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull

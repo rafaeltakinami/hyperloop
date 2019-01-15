@@ -1,7 +1,7 @@
-package br.com.guiabolso.hyperloop.schemas.parser.tree
+package br.com.guiabolso.hyperloop.validation.v2.parser.tree
 
 import br.com.guiabolso.hyperloop.exceptions.InvalidInputException
-import br.com.guiabolso.hyperloop.validation.v1.PrimitiveTypes
+import br.com.guiabolso.hyperloop.validation.PrimitiveTypes
 import com.google.gson.JsonElement
 import com.google.gson.JsonNull
 import com.google.gson.JsonPrimitive

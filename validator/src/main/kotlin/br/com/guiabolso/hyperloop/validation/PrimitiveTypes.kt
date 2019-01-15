@@ -1,4 +1,4 @@
-package br.com.guiabolso.hyperloop.validation.v1
+package br.com.guiabolso.hyperloop.validation
 
 import br.com.guiabolso.hyperloop.exceptions.InvalidInputException
 import com.google.gson.JsonPrimitive

@@ -1,4 +1,4 @@
-package br.com.guiabolso.hyperloop.schemas.parser.tree
+package br.com.guiabolso.hyperloop.validation.v2.parser.tree
 
 
 class SchemaTree(

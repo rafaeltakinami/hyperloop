@@ -5,8 +5,8 @@ import br.com.guiabolso.hyperloop.exceptions.InvalidInputException
 import br.com.guiabolso.hyperloop.schemas.CachedSchemaRepository
 import br.com.guiabolso.hyperloop.schemas.SchemaKey
 import br.com.guiabolso.hyperloop.schemas.SchemaRepository
-import br.com.guiabolso.hyperloop.schemas.parser.tree.SchemaTree
-import br.com.guiabolso.hyperloop.schemas.parser.tree.SchemaTreeParser
+import br.com.guiabolso.hyperloop.validation.v2.parser.tree.SchemaTree
+import br.com.guiabolso.hyperloop.validation.v2.parser.tree.SchemaTreeParser
 import br.com.guiabolso.hyperloop.validation.ValidationResult
 import br.com.guiabolso.hyperloop.validation.Validator
 import br.com.guiabolso.hyperloop.validation.v2.extractor.event.EventPathExtractor
@@ -22,26 +22,27 @@ class EventValidatorV2(
         val schema = cachedSchemaRepository.get(SchemaKey(event.name, event.version))
 
         val schemaTree = SchemaTreeParser.parse(schema)
-        val paths = EventPathExtractor.extract(event)
+        val eventPaths = EventPathExtractor.extract(event)
 
-        val validationErrors = validationErrors(schemaTree, paths)
-
-        val encryptedFields = schemaTree.filter { it.value.encrypted }.map { it.value.path }.toMutableSet()
-
-        return ValidationResult(validationErrors.size != 0, validationErrors, encryptedFields)
+        val validationErrors = validationErrors(schemaTree, eventPaths)
+        return ValidationResult(
+            validationSuccess = validationErrors.size != 0,
+            validationErrors = validationErrors,
+            encryptedFields = schemaTree.filter { it.value.encrypted }.map { it.value.path }.toMutableSet()
+        )
     }
 
     private fun validationErrors(
         schemaTree: SchemaTree,
-        paths: Map<String, JsonPath>
+        eventPaths: Map<String, JsonPath>
     ): MutableSet<Throwable> {
         val validationErrors = mutableSetOf<Throwable>()
         for ((jsonPath, scalarNode) in schemaTree) {
-            if (jsonPath !in paths) {
+            if (jsonPath !in eventPaths) {
                 validationErrors.add(InvalidInputException("Path $jsonPath not found in json"))
                 continue
             }
-            val jsonValue = paths[jsonPath]!!.value
+            val jsonValue = eventPaths[jsonPath]!!.value
             try {
                 scalarNode.validate(jsonValue)
             } catch (e: Exception) {
