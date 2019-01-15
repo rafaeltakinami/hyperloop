@@ -8,7 +8,7 @@ import br.com.guiabolso.hyperloop.exceptions.SendMessageException
 import br.com.guiabolso.hyperloop.schemas.aws.S3SchemaRepository
 import br.com.guiabolso.hyperloop.transport.MessageResult
 import br.com.guiabolso.hyperloop.transport.Transport
-import br.com.guiabolso.hyperloop.validation.EventValidator
+import br.com.guiabolso.hyperloop.validation.v1.EventValidator
 import br.com.guiabolso.hyperloop.validation.Validator
 import br.com.guiabolso.hyperloop.validation.exceptions.ValidationException
 import com.amazonaws.regions.Regions

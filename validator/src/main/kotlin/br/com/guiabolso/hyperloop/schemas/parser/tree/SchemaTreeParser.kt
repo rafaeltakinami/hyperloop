@@ -1,0 +1,88 @@
+package br.com.guiabolso.hyperloop.schemas.parser.tree
+
+import br.com.guiabolso.hyperloop.validation.v1.PrimitiveTypes
+import br.com.guiabolso.hyperloop.validation.v1.PrimitiveTypes.STRING
+import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.node.ArrayNode
+import com.fasterxml.jackson.databind.node.ObjectNode
+import com.fasterxml.jackson.databind.node.TextNode
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+
+object SchemaTreeParser {
+
+    fun parse(rawSchema: String): SchemaTree {
+        val schema = yaml.readTree(rawSchema)
+        val schemaVersion = schema["schema"]?.get("version")?.intValue()
+            ?: throw IllegalArgumentException("Invalid schema. Impossible to detect schema version")
+
+        if (schemaVersion != SUPPORTED_SCHEMA_VERSION) throw IllegalArgumentException("Unsupported schema version: $schemaVersion")
+
+        val types = schema["types"] as? ObjectNode ?: throw IllegalStateException("Types should not be empty on schema")
+        val validation = schema["validation"] as? ObjectNode
+            ?: throw IllegalStateException("Validation should not be empty on schema")
+
+        val nodes = this.createNodes("$", validation, types)
+        return SchemaTree(nodes)
+    }
+
+    private fun createNodes(nodePath: String, next: ObjectNode, types: ObjectNode): Map<String, ScalarNode> {
+        val mapResult = createResultMap(nodePath)
+        next.fields().forEach { (key, node) ->
+            if (node.isScalar()) {
+                mapResult["$nodePath.$key"] = ScalarNode(
+                    path = "$nodePath.$key",
+                    type = node.type()!!,
+                    required = node.isRequired(),
+                    nullable = node.isNullable(),
+                    encrypted = node.isEncrypted()
+                )
+            } else {
+                mapResult.putAll(createNodes("$nodePath.$key", types[node.rawType()] as ObjectNode, types))
+            }
+        }
+        return mapResult
+    }
+
+    private fun createResultMap(nodePath: String): MutableMap<String, ScalarNode> =
+        when {
+            isRoot(nodePath) -> mutableMapOf(
+                "$.id" to ScalarNode(
+                    path = "$.id",
+                    type = STRING,
+                    required = true,
+                    nullable = false,
+                    encrypted = false
+                ),
+                "$.flowId" to ScalarNode(
+                    path = "$.flowId",
+                    type = STRING,
+                    required = true,
+                    nullable = false,
+                    encrypted = false
+                )
+            )
+            else -> mutableMapOf()
+        }
+
+
+    private fun isRoot(nodePath: String) = nodePath == "$"
+    private fun JsonNode.rawType() = this["of"].textValue().replace(arrayTypeRegex) { it.groupValues[1] }
+    private fun JsonNode.type() =
+        PrimitiveTypes.valueOfOrNull(this.rawType().toUpperCase())
+
+    private fun JsonNode.isScalar() = this.type() in PrimitiveTypes.values()
+    private fun JsonNode.isRequired() = TextNode("required") in this.propertyArray()
+    private fun JsonNode.isNullable() = TextNode("nullable") in this.propertyArray()
+    private fun JsonNode.isEncrypted() = TextNode("encrypted") in this.propertyArray()
+    private fun JsonNode.propertyArray() = (this["is"] as? ArrayNode) ?: yaml.createArrayNode()
+
+    private val arrayTypeRegex = "^array\\((.+)\\)\$".toRegex(RegexOption.IGNORE_CASE)
+    private const val SUPPORTED_SCHEMA_VERSION = 2
+    private val yaml = ObjectMapper(YAMLFactory()).registerKotlinModule()
+
+}
+
+
+

@@ -1,4 +1,4 @@
-package br.com.guiabolso.hyperloop.validation.types
+package br.com.guiabolso.hyperloop.validation.v1
 
 import com.fasterxml.jackson.databind.JsonNode
 

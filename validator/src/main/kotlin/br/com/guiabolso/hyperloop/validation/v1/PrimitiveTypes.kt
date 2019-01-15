@@ -1,7 +1,9 @@
-package br.com.guiabolso.hyperloop.validation.types
+package br.com.guiabolso.hyperloop.validation.v1
 
 import br.com.guiabolso.hyperloop.exceptions.InvalidInputException
 import com.google.gson.JsonPrimitive
+import java.text.ParseException
+import java.text.SimpleDateFormat
 
 enum class PrimitiveTypes {
     STRING {
@@ -53,7 +55,27 @@ enum class PrimitiveTypes {
                 throw InvalidInputException("Input $element is not a boolean")
             }
         }
+    },
+    DATETIME {
+        override fun verifyType(element: JsonPrimitive) {
+            val simpleDateFormat = SimpleDateFormat("//TODO: INSTANT DATE") // TODO: INSTANT FORMAT
+            try {
+                simpleDateFormat.parse(element.asString)
+            } catch (e: ParseException) {
+                throw InvalidInputException("Date Element '${element.asString}' is not a INSTANT DATE")
+            }
+        }
     };
+
+    companion object {
+        fun valueOfOrNull(value: String): PrimitiveTypes? {
+            return try {
+                PrimitiveTypes.valueOf(value)
+            } catch (e: IllegalArgumentException) {
+                null
+            }
+        }
+    }
 
     abstract fun verifyType(element: JsonPrimitive)
 }

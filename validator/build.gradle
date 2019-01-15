@@ -1,6 +1,10 @@
 dependencies {
     compile 'com.amazonaws:aws-java-sdk-s3:1.11.367'
     compile 'com.github.ben-manes.caffeine:caffeine:2.6.0'
+
+    compile 'com.fasterxml.jackson.core:jackson-databind:2.9.6'
+    compile 'com.fasterxml.jackson.module:jackson-module-kotlin:2.9.6'
+    compile 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.9.6'
 }
 
 
@@ -9,6 +13,7 @@ apply plugin: 'com.novoda.bintray-release'
 publish {
     artifactId = 'hyperloop-validator'
     autoPublish = true
+    userOrg = "guiabolso"
     desc = 'Validator classes for hyperloop'
     groupId = 'br.com.guiabolso'
     licences = ['APACHE-2.0']

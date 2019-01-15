@@ -1,0 +1,64 @@
+schema:
+  version: 2
+
+event:
+  name: send:mobile:event
+  version: 2
+
+types:
+  $Property:
+    key:
+      of: string
+      is:
+        - required
+    value:
+      of: string
+      is:
+        - required
+
+  $Payload:
+    name:
+      of: string
+      is:
+        - required
+    createdAt:
+      of: datetime
+      is:
+        - required
+    properties:
+      of: array($Property)
+
+  $Identity:
+    userId:
+      of: long
+      is:
+        - required
+
+  $Metadata:
+    origin:
+      of: string
+      is:
+        - required
+
+validation:
+  payload:
+    of: $Payload
+    is:
+      - required
+  identity:
+    of: $Identity
+  metadata:
+    of: $Metadata
+
+streaming:
+  database: mobile_events
+  tables:
+    users_events:
+      event_id: $.flowId
+      event_name: $.payload.name
+      created_at: $.payload.createdAt
+
+    properties_array[$.payload.properties]:
+      event_id: $.flowId
+      key: '@.key'
+      value: '@.value'
