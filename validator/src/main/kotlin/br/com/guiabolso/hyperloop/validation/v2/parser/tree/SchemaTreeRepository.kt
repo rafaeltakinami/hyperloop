@@ -23,9 +23,12 @@ class SchemaTreeRepository(
         val schemaVersion = schema["schema"]?.get("version")?.intValue()
             ?: throw IllegalArgumentException("Invalid schema. Impossible to detect schema version")
 
-        if (schemaVersion != SUPPORTED_SCHEMA_VERSION) throw IllegalArgumentException("Unsupported schema version: $schemaVersion")
+        if (schemaVersion != SUPPORTED_SCHEMA_VERSION) {
+            throw IllegalArgumentException("Unsupported schema version: $schemaVersion")
+        }
 
-        val types = schema["types"] as? ObjectNode ?: throw IllegalStateException("Types should not be empty on schema")
+        val types = schema["types"] as? ObjectNode
+            ?: throw IllegalStateException("Types should not be empty on schema")
         val validation = schema["validation"] as? ObjectNode
             ?: throw IllegalStateException("Validation should not be empty on schema")
 

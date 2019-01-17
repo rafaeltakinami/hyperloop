@@ -13,13 +13,13 @@ import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
 
-class SchemaTreeParserTest {
+class SchemaRepositoryTest {
 
     private lateinit var schemaRepository: SchemaRepository<String>
 
     @Before
     fun setUp() {
-        schemaRepository = mock<SchemaRepository<String>>()
+        schemaRepository = mock()
         whenever(schemaRepository.get(any())).thenReturn(loadSchemaFromFile("/schema_V2_test.yaml"))
     }
 
@@ -32,7 +32,6 @@ class SchemaTreeParserTest {
         assertEquals(PrimitiveTypes.STRING, node!!.type)
         assertEquals("$.metadata.origin", node.path)
         assertNotNull(schemaTree)
-
     }
 
     @Test

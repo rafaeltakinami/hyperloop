@@ -17,16 +17,17 @@ data class ScalarNode(
 ) {
 
     fun validate(element: JsonElement?) {
-        if ((element == null || element is JsonNull) && !nullable) {
-            InvalidInputException("Element in path $path cannot be null.")
-        } else if (element is JsonArray) {
-            for (el in element) {
-                validate(el)
+        when {
+            element.isNull() && !nullable -> InvalidInputException("Element in path $path cannot be null.")
+            element is JsonArray -> for (el in element) {
+                this.validate(el)
             }
-        } else if (element is JsonPrimitive) {
-            type.verifyType(element)
-        } else throw IllegalStateException("Element is not null or primitive. This probably is a parser bug.")
+            element is JsonPrimitive -> type.verifyType(element)
+            else -> throw IllegalStateException("Element is not null or primitive. This probably is a parser bug.")
+        }
     }
+
+    private fun JsonElement?.isNull() = this == null || this is JsonNull
 
     override fun toString() = "$path -> required: $required nullable: $nullable encrypted: $encrypted"
 }

@@ -15,7 +15,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
-class EventValidatorTest {
+class EventValidatorV1Test {
 
     private lateinit var mockSchemaRepository: SchemaRepository<String>
     private lateinit var eventValidator: EventValidatorV1
@@ -29,7 +29,6 @@ class EventValidatorTest {
     private lateinit var schemaWithNullPayload: String
     private lateinit var schemaWithNullType: String
     private lateinit var schemaWithUserIds: String
-    private lateinit var schemaV2: String
 
     @Before
     fun setUp() {
@@ -42,7 +41,6 @@ class EventValidatorTest {
         schemaWithNullPayload = loadSchemaFromFile("/null_payload_schema.yml")
         schemaWithNullType = loadSchemaFromFile("/null_type_schema.yml")
         schemaWithUserIds = loadSchemaFromFile("/identity-userIds-schema.yml")
-        schemaV2 = loadSchemaFromFile("/schema_V2_test.yaml")
 
         mockSchemaRepository = mock()
         eventValidator = EventValidatorV1(SchemaDataRepository(mockSchemaRepository))
