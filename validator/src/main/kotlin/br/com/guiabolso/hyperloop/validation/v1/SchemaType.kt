@@ -1,5 +1,6 @@
-package br.com.guiabolso.hyperloop.validation.types
+package br.com.guiabolso.hyperloop.validation.v1
 
+import br.com.guiabolso.hyperloop.validation.PrimitiveTypes
 import com.fasterxml.jackson.databind.JsonNode
 
 sealed class SchemaType {

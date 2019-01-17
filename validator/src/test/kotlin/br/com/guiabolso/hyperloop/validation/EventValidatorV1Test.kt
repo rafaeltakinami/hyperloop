@@ -2,8 +2,10 @@ package br.com.guiabolso.hyperloop.validation
 
 import br.com.guiabolso.events.model.RequestEvent
 import br.com.guiabolso.hyperloop.exceptions.InvalidInputException
+import br.com.guiabolso.hyperloop.schemas.SchemaDataRepository
 import br.com.guiabolso.hyperloop.schemas.SchemaKey
 import br.com.guiabolso.hyperloop.schemas.SchemaRepository
+import br.com.guiabolso.hyperloop.validation.v1.EventValidatorV1
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.nhaarman.mockitokotlin2.mock
@@ -13,10 +15,10 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
-class EventValidatorTest {
+class EventValidatorV1Test {
 
     private lateinit var mockSchemaRepository: SchemaRepository<String>
-    private lateinit var eventValidator: EventValidator
+    private lateinit var eventValidator: EventValidatorV1
 
     private lateinit var schema: String
     private lateinit var schemaWithMap: String
@@ -41,7 +43,7 @@ class EventValidatorTest {
         schemaWithUserIds = loadSchemaFromFile("/identity-userIds-schema.yml")
 
         mockSchemaRepository = mock()
-        eventValidator = EventValidator(mockSchemaRepository)
+        eventValidator = EventValidatorV1(SchemaDataRepository(mockSchemaRepository))
     }
 
     @Test
@@ -110,8 +112,11 @@ class EventValidatorTest {
                         "l": "Thiago"
                 """.trimIndent()
 
+
         whenever(mockSchemaRepository.get(SchemaKey("event_test", 1))).thenReturn(schema)
+
         val response = eventValidator.validate(newEvent("event_test", 1, payload))
+
         assertTrue(response.validationSuccess)
         assertTrue(response.validationErrors.isEmpty())
         assertTrue(response.encryptedFields.contains("$.payload.users[*].name"))
@@ -275,7 +280,8 @@ class EventValidatorTest {
         val event = newEvent("event_test", 1, payload)
         whenever(mockSchemaRepository.get(SchemaKey("event_test", 1))).thenReturn(schemaWithNullPayload)
         val expectedErrors = mutableListOf<Throwable>(
-                InvalidInputException("Event has non-empty payload but the schema has no specification"))
+            InvalidInputException("Event has non-empty payload but the schema has no specification")
+        )
         val response = eventValidator.validate(event)
 
         assertFalse(response.validationSuccess)
@@ -323,7 +329,8 @@ class EventValidatorTest {
 
         whenever(mockSchemaRepository.get(SchemaKey("event_test", 1))).thenReturn(schemaWithNullIdentity)
         val expectedErrors = mutableListOf<Throwable>(
-                InvalidInputException("Element 'userId' must be a JsonPrimitive"))
+            InvalidInputException("Element 'userId' must be a JsonPrimitive")
+        )
         val response = eventValidator.validate(event)
 
         assertFalse(response.validationSuccess)
@@ -342,7 +349,8 @@ class EventValidatorTest {
 
         whenever(mockSchemaRepository.get(SchemaKey("event_test", 1))).thenReturn(schemaWithNullIdentity)
         val expectedErrors = mutableListOf<Throwable>(
-                InvalidInputException("Element 'userIds' must be a JsonArray"))
+            InvalidInputException("Element 'userIds' must be a JsonArray")
+        )
         val response = eventValidator.validate(event)
 
         assertFalse(response.validationSuccess)
@@ -370,10 +378,11 @@ class EventValidatorTest {
         event.identity.remove("userId")
         whenever(mockSchemaRepository.get(SchemaKey("event_test", 1))).thenReturn(schemaWithNullType)
         val expectedErrors = mutableListOf<Throwable>(
-                InvalidInputException("Element 'name' is required"),
-                InvalidInputException("Identity must have 'userId' or 'userIds'"),
-                InvalidInputException("Element 'userId' is required"),
-                InvalidInputException("Element 'origin' is required"))
+            InvalidInputException("Element 'name' is required"),
+            InvalidInputException("Identity must have 'userId' or 'userIds'"),
+            InvalidInputException("Element 'userId' is required"),
+            InvalidInputException("Element 'origin' is required")
+        )
         val response = eventValidator.validate(event)
 
         assertFalse(response.validationSuccess)
@@ -390,8 +399,9 @@ class EventValidatorTest {
                 """.trimIndent()
         whenever(mockSchemaRepository.get(SchemaKey("event_test", 1))).thenReturn(schema)
         val expectedErrors = mutableListOf<Throwable>(
-                InvalidInputException("Array element 'users' is in the wrong format"),
-                InvalidInputException("Element 'name' is required"))
+            InvalidInputException("Array element 'users' is in the wrong format"),
+            InvalidInputException("Element 'name' is required")
+        )
         val response = eventValidator.validate(newEvent("event_test", 1, payload))
 
         assertFalse(response.validationSuccess)
@@ -416,28 +426,32 @@ class EventValidatorTest {
     }
 
     private fun newEvent(
-            eventName: String,
-            eventVersion: Int,
-            payload: String,
-            identity: String? = """ "userId": 1 """
-            ): RequestEvent {
+        eventName: String,
+        eventVersion: Int,
+        payload: String,
+        identity: String? = """ "userId": 1 """
+    ): RequestEvent {
 
         val metadata = JsonObject()
         metadata.addProperty("origin", "origin")
 
         return RequestEvent(
-                eventName,
-                eventVersion,
-                "Id",
-                "flowId",
-                JsonParser().parse("""{
+            eventName,
+            eventVersion,
+            "Id",
+            "flowId",
+            JsonParser().parse(
+                """{
                         $payload
-                }"""),
-                JsonParser().parse("""{
+                }"""
+            ),
+            JsonParser().parse(
+                """{
                         $identity
-                }""").asJsonObject,
-                JsonObject(),
-                metadata
+                }"""
+            ).asJsonObject,
+            JsonObject(),
+            metadata
         )
     }
 

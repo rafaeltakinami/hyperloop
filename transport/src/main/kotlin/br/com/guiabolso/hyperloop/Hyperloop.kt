@@ -8,8 +8,8 @@ import br.com.guiabolso.hyperloop.exceptions.SendMessageException
 import br.com.guiabolso.hyperloop.schemas.aws.S3SchemaRepository
 import br.com.guiabolso.hyperloop.transport.MessageResult
 import br.com.guiabolso.hyperloop.transport.Transport
-import br.com.guiabolso.hyperloop.validation.EventValidator
 import br.com.guiabolso.hyperloop.validation.Validator
+import br.com.guiabolso.hyperloop.validation.VersionedEventValidator
 import br.com.guiabolso.hyperloop.validation.exceptions.ValidationException
 import com.amazonaws.regions.Regions
 import com.google.gson.GsonBuilder
@@ -17,9 +17,9 @@ import com.google.gson.GsonBuilder
 class Hyperloop
 @JvmOverloads
 constructor(
-        private val transport: Transport,
-        private val validator: Validator = defaultValidator(),
-        private val messageCypher: MessageCypher = NoOpMessageCypher
+    private val transport: Transport,
+    private val validator: Validator = defaultValidator(),
+    private val messageCypher: MessageCypher = NoOpMessageCypher
 ) {
 
     private val gson = GsonBuilder().serializeNulls().create()
@@ -43,11 +43,11 @@ constructor(
 
     companion object {
         @JvmStatic
-        private fun defaultValidator(): EventValidator {
+        private fun defaultValidator(): VersionedEventValidator {
             val bucket = getEnv("HYPERLOOP_BUCKET", "hyperloop-schemas")
             val region = Regions.fromName(getEnv("HYPERLOOP_REGION", "sa-east-1"))
             val s3SchemaRepository = S3SchemaRepository(bucket, region)
-            return EventValidator(s3SchemaRepository)
+            return VersionedEventValidator(s3SchemaRepository)
         }
     }
 }

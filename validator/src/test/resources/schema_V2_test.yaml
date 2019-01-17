@@ -1,0 +1,57 @@
+schema:
+  version: 2
+
+event:
+  name: test
+  version: 1
+
+types:
+
+  $ArrayObj:
+    anotherStr:
+      of: string
+
+    yetAnotherStr:
+      of: string
+
+  $Nested:
+    someStr:
+      of: string
+      is:
+        - required
+
+  $Payload:
+    answer:
+      of: int
+      is:
+        - required
+    nested:
+      of: $Nested
+      is:
+        - required
+    array:
+      of: array($ArrayObj)
+    arrayPrimitive:
+      of: array(int)
+      is:
+        - required
+
+  $Identity:
+    userId:
+      of: long
+      is:
+        - required
+
+  $Metadata:
+    origin:
+      of: string
+      is:
+        - required
+
+validation:
+  payload:
+    of: $Payload
+    is:
+      - required
+  metadata:
+    of: $Metadata
