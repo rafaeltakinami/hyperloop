@@ -20,7 +20,7 @@ import kotlin.collections.MutableMap.MutableEntry
 
 typealias InputSchemaSpec = MutableIterator<MutableEntry<String, JsonNode>>
 
-class EventValidator(
+class EventValidatorV1(
     private val schemaRepository: SchemaRepository<SchemaData>
 ) : Validator {
 

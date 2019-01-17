@@ -5,7 +5,7 @@ import br.com.guiabolso.hyperloop.exceptions.InvalidInputException
 import br.com.guiabolso.hyperloop.schemas.SchemaDataRepository
 import br.com.guiabolso.hyperloop.schemas.SchemaKey
 import br.com.guiabolso.hyperloop.schemas.SchemaRepository
-import br.com.guiabolso.hyperloop.validation.v1.EventValidator
+import br.com.guiabolso.hyperloop.validation.v1.EventValidatorV1
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.nhaarman.mockitokotlin2.mock
@@ -18,7 +18,7 @@ import org.junit.Test
 class EventValidatorTest {
 
     private lateinit var mockSchemaRepository: SchemaRepository<String>
-    private lateinit var eventValidator: EventValidator
+    private lateinit var eventValidator: EventValidatorV1
 
     private lateinit var schema: String
     private lateinit var schemaWithMap: String
@@ -45,7 +45,7 @@ class EventValidatorTest {
         schemaV2 = loadSchemaFromFile("/schema_V2_test.yaml")
 
         mockSchemaRepository = mock()
-        eventValidator = EventValidator(SchemaDataRepository(mockSchemaRepository))
+        eventValidator = EventValidatorV1(SchemaDataRepository(mockSchemaRepository))
     }
 
     @Test

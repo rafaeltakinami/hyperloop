@@ -33,10 +33,7 @@ class EventValidatorV2(
         )
     }
 
-    private fun validationErrors(
-        schemaTree: SchemaTree,
-        jsonContext: DocumentContext
-    ): MutableSet<Throwable> {
+    private fun validationErrors(schemaTree: SchemaTree, jsonContext: DocumentContext): MutableSet<Throwable> {
         val validationErrors = mutableSetOf<Throwable>()
         for ((jsonPath, node) in schemaTree) {
             try {
