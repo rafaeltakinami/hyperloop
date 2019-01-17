@@ -1,32 +1,33 @@
 package br.com.guiabolso.hyperloop.validation.v2
 
 import br.com.guiabolso.events.model.RequestEvent
-import br.com.guiabolso.hyperloop.exceptions.InvalidInputException
-import br.com.guiabolso.hyperloop.schemas.CachedSchemaRepository
 import br.com.guiabolso.hyperloop.schemas.SchemaKey
 import br.com.guiabolso.hyperloop.schemas.SchemaRepository
-import br.com.guiabolso.hyperloop.validation.v2.parser.tree.SchemaTree
-import br.com.guiabolso.hyperloop.validation.v2.parser.tree.SchemaTreeParser
 import br.com.guiabolso.hyperloop.validation.ValidationResult
 import br.com.guiabolso.hyperloop.validation.Validator
-import br.com.guiabolso.hyperloop.validation.v2.extractor.event.EventPathExtractor
+import br.com.guiabolso.hyperloop.validation.v2.parser.tree.SchemaTree
+import com.google.gson.GsonBuilder
+import com.google.gson.JsonElement
+import com.jayway.jsonpath.Configuration
+import com.jayway.jsonpath.DocumentContext
+import com.jayway.jsonpath.JsonPath
+import com.jayway.jsonpath.PathNotFoundException
+import com.jayway.jsonpath.spi.json.GsonJsonProvider
 
 
 class EventValidatorV2(
-    schemaRepository: SchemaRepository<String>
+    private val schemaRepository: SchemaRepository<SchemaTree>
 ) : Validator {
 
-    private val cachedSchemaRepository = CachedSchemaRepository(schemaRepository)
-
     override fun validate(event: RequestEvent): ValidationResult {
-        val schema = cachedSchemaRepository.get(SchemaKey(event.name, event.version))
+        val schemaTree = schemaRepository.get(SchemaKey(event.name, event.version))
 
-        val schemaTree = SchemaTreeParser.parse(schema)
-        val eventPaths = EventPathExtractor.extract(event)
+        val jsonStr = gson.toJson(event)
+        val jsonContext = JsonPath.parse(jsonStr, jsonContextConfiguration)
 
-        val validationErrors = validationErrors(schemaTree, eventPaths)
+        val validationErrors = validationErrors(schemaTree, jsonContext)
         return ValidationResult(
-            validationSuccess = validationErrors.size != 0,
+            validationSuccess = validationErrors.size == 0,
             validationErrors = validationErrors,
             encryptedFields = schemaTree.filter { it.value.encrypted }.map { it.value.path }.toMutableSet()
         )
@@ -34,17 +35,17 @@ class EventValidatorV2(
 
     private fun validationErrors(
         schemaTree: SchemaTree,
-        eventPaths: Map<String, JsonPath>
+        jsonContext: DocumentContext
     ): MutableSet<Throwable> {
         val validationErrors = mutableSetOf<Throwable>()
-        for ((jsonPath, scalarNode) in schemaTree) {
-            if (jsonPath !in eventPaths) {
-                validationErrors.add(InvalidInputException("Path $jsonPath not found in json"))
-                continue
-            }
-            val jsonValue = eventPaths[jsonPath]!!.value
+        for ((jsonPath, node) in schemaTree) {
             try {
-                scalarNode.validate(jsonValue)
+                val element = jsonContext.read<JsonElement>(jsonPath)
+                node.validate(element)
+            } catch (e: PathNotFoundException) {
+                if (node.required) {
+                    validationErrors.add(e)
+                }
             } catch (e: Exception) {
                 validationErrors.add(e)
             }
@@ -52,4 +53,11 @@ class EventValidatorV2(
         return validationErrors
     }
 
+    companion object {
+        private val gson = GsonBuilder().serializeNulls().create()
+        private val jsonContextConfiguration = Configuration
+            .builder()
+            .jsonProvider(GsonJsonProvider(gson))
+            .build()
+    }
 }

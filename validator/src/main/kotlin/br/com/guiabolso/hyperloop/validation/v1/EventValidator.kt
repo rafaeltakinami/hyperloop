@@ -3,8 +3,6 @@ package br.com.guiabolso.hyperloop.validation.v1
 import br.com.guiabolso.events.model.RequestEvent
 import br.com.guiabolso.hyperloop.exceptions.InvalidInputException
 import br.com.guiabolso.hyperloop.model.SchemaData
-import br.com.guiabolso.hyperloop.schemas.CachedSchemaRepository
-import br.com.guiabolso.hyperloop.schemas.SchemaDataRepository
 import br.com.guiabolso.hyperloop.schemas.SchemaKey
 import br.com.guiabolso.hyperloop.schemas.SchemaRepository
 import br.com.guiabolso.hyperloop.utils.allNull
@@ -23,22 +21,16 @@ import kotlin.collections.MutableMap.MutableEntry
 typealias InputSchemaSpec = MutableIterator<MutableEntry<String, JsonNode>>
 
 class EventValidator(
-    schemaRepository: SchemaRepository<String>
+    private val schemaRepository: SchemaRepository<SchemaData>
 ) : Validator {
 
-    private val cachedSchemaRepository: CachedSchemaRepository<SchemaData>
-
-    init {
-        val schemaDataRepository = SchemaDataRepository(schemaRepository)
-        cachedSchemaRepository = CachedSchemaRepository(schemaDataRepository)
-    }
 
     override fun validate(event: RequestEvent): ValidationResult {
         val validationResult =
             ValidationResult(false, mutableSetOf(), mutableSetOf())
         val encryptedElementPath = mutableListOf<String>()
         val schemaKey = SchemaKey(event.name, event.version)
-        val schemaData = cachedSchemaRepository.get(schemaKey)
+        val schemaData = schemaRepository.get(schemaKey)
 
         if (schemaData.event.name != event.name)
             validationResult.validationErrors.add(InvalidInputException("The event name '${event.name}' is different from schema '${schemaData.event.name}'"))

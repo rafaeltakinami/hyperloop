@@ -2,10 +2,10 @@ package br.com.guiabolso.hyperloop.validation
 
 import br.com.guiabolso.events.model.RequestEvent
 import br.com.guiabolso.hyperloop.exceptions.InvalidInputException
+import br.com.guiabolso.hyperloop.schemas.SchemaDataRepository
 import br.com.guiabolso.hyperloop.schemas.SchemaKey
 import br.com.guiabolso.hyperloop.schemas.SchemaRepository
 import br.com.guiabolso.hyperloop.validation.v1.EventValidator
-import br.com.guiabolso.hyperloop.validation.v2.EventValidatorV2
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.nhaarman.mockitokotlin2.mock
@@ -45,7 +45,7 @@ class EventValidatorTest {
         schemaV2 = loadSchemaFromFile("/schema_V2_test.yaml")
 
         mockSchemaRepository = mock()
-        eventValidator = EventValidator(mockSchemaRepository)
+        eventValidator = EventValidator(SchemaDataRepository(mockSchemaRepository))
     }
 
     @Test
@@ -114,37 +114,11 @@ class EventValidatorTest {
                         "l": "Thiago"
                 """.trimIndent()
 
-        val eventValidatorV2 = EventValidatorV2(mockSchemaRepository)
 
         whenever(mockSchemaRepository.get(SchemaKey("event_test", 1))).thenReturn(schema)
 
-        val response = eventValidatorV2.validate(newEvent("event_test", 1, payload))
+        val response = eventValidator.validate(newEvent("event_test", 1, payload))
 
-        assertTrue(response.validationSuccess)
-        assertTrue(response.validationErrors.isEmpty())
-        assertTrue(response.encryptedFields.contains("$.payload.users[*].name"))
-        assertTrue(response.encryptedFields.contains("$.payload.users[*].friend.name"))
-        assertTrue(response.encryptedFields.contains("$.payload.file.name"))
-        assertTrue(response.encryptedFields.contains("$.payload.file.quantity"))
-        assertTrue(response.encryptedFields.contains("$.identity.userId"))
-        assertTrue(response.encryptedFields.contains("$.metadata.origin"))
-    }
-
-    @Test
-    fun `test successful validation of schemaV2`() {
-        val payload = """
-                        "name": "xpto",
-                        "createdAt": "15/01/2019",
-                        "properties":[
-                            {
-                                "key": "test",
-                                "value":"42"
-                            }
-                        ]
-                """.trimIndent()
-
-        whenever(mockSchemaRepository.get(SchemaKey("send:mobile:event", 2))).thenReturn(schemaV2)
-        val response = eventValidator.validate(newEvent("send:mobile:event", 2, payload))
         assertTrue(response.validationSuccess)
         assertTrue(response.validationErrors.isEmpty())
         assertTrue(response.encryptedFields.contains("$.payload.users[*].name"))

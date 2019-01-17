@@ -9,9 +9,9 @@ class SchemaTree(
         return treeMap.iterator()
     }
 
-    fun findNode(jsonPath: String): ScalarNode? {
-        val cleanJsonPath = jsonPath.replace(Regex("\\[\\d+]"), "")
+    operator fun contains(jsonPath: String) = cleanJsonPath(jsonPath) in treeMap
 
-        return treeMap[cleanJsonPath]
-    }
+    operator fun get(jsonPath: String) = treeMap[jsonPath]
+
+    private fun cleanJsonPath(jsonPath: String) = jsonPath.replace(Regex("\\[\\d+]"), "")
 }

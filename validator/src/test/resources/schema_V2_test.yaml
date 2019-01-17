@@ -2,31 +2,39 @@ schema:
   version: 2
 
 event:
-  name: send:mobile:event
-  version: 2
+  name: test
+  version: 1
 
 types:
-  $Property:
-    key:
+
+  $ArrayObj:
+    anotherStr:
       of: string
-      is:
-        - required
-    value:
+
+    yetAnotherStr:
+      of: string
+
+  $Nested:
+    someStr:
       of: string
       is:
         - required
 
   $Payload:
-    name:
-      of: string
+    answer:
+      of: int
       is:
         - required
-    createdAt:
-      of: datetime
+    nested:
+      of: $Nested
       is:
         - required
-    properties:
-      of: array($Property)
+    array:
+      of: array($ArrayObj)
+    arrayPrimitive:
+      of: array(int)
+      is:
+        - required
 
   $Identity:
     userId:
@@ -45,20 +53,5 @@ validation:
     of: $Payload
     is:
       - required
-  identity:
-    of: $Identity
   metadata:
     of: $Metadata
-
-streaming:
-  database: mobile_events
-  tables:
-    users_events:
-      event_id: $.flowId
-      event_name: $.payload.name
-      created_at: $.payload.createdAt
-
-    properties_array[$.payload.properties]:
-      event_id: $.flowId
-      key: '@.key'
-      value: '@.value'

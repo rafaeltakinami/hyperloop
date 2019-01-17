@@ -3,7 +3,7 @@ package br.com.guiabolso.hyperloop.validation
 import br.com.guiabolso.hyperloop.exceptions.InvalidInputException
 import com.google.gson.JsonPrimitive
 import java.text.ParseException
-import java.text.SimpleDateFormat
+import java.time.format.DateTimeFormatter
 
 enum class PrimitiveTypes {
     STRING {
@@ -16,7 +16,7 @@ enum class PrimitiveTypes {
     LONG {
         override fun verifyType(element: JsonPrimitive) {
             try {
-                element.asString.toLong()
+                element.asLong
             } catch (exception: Exception) {
                 throw InvalidInputException("Input $element is not a long")
             }
@@ -25,7 +25,7 @@ enum class PrimitiveTypes {
     INT {
         override fun verifyType(element: JsonPrimitive) {
             try {
-                element.asString.toInt()
+                element.asInt
             } catch (exception: Exception) {
                 throw InvalidInputException("Input $element is not an int")
             }
@@ -34,7 +34,7 @@ enum class PrimitiveTypes {
     FLOAT {
         override fun verifyType(element: JsonPrimitive) {
             try {
-                element.asString.toFloat()
+                element.asFloat
             } catch (exception: Exception) {
                 throw InvalidInputException("Input $element is not a float")
             }
@@ -43,7 +43,7 @@ enum class PrimitiveTypes {
     DOUBLE {
         override fun verifyType(element: JsonPrimitive) {
             try {
-                element.asString.toDouble()
+                element.asDouble
             } catch (exception: Exception) {
                 throw InvalidInputException("Input $element is not a double")
             }
@@ -58,9 +58,8 @@ enum class PrimitiveTypes {
     },
     DATETIME {
         override fun verifyType(element: JsonPrimitive) {
-            val simpleDateFormat = SimpleDateFormat("//TODO: INSTANT DATE") // TODO: INSTANT FORMAT
             try {
-                simpleDateFormat.parse(element.asString)
+                DateTimeFormatter.ISO_INSTANT.parse(element.asString)
             } catch (e: ParseException) {
                 throw InvalidInputException("Date Element '${element.asString}' is not a INSTANT DATE")
             }
