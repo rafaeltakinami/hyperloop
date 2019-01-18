@@ -37,7 +37,7 @@ class SchemaTreeRepository(
     }
 
     private fun createNodes(nodePath: String, next: ObjectNode, types: ObjectNode): Map<String, ScalarNode> {
-        val mapResult = createResultMap(nodePath)
+        val mapResult = createDefaultNodes(nodePath)
         next.fields().forEach { (key, node) ->
             when {
                 node.isScalar() -> mapResult["$nodePath.$key"] = ScalarNode(
@@ -60,7 +60,7 @@ class SchemaTreeRepository(
         return mapResult
     }
 
-    private fun createResultMap(nodePath: String): MutableMap<String, ScalarNode> =
+    private fun createDefaultNodes(nodePath: String): MutableMap<String, ScalarNode> =
         when {
             isRoot(nodePath) -> mutableMapOf(
                 "$.name" to ScalarNode(

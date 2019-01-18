@@ -6,7 +6,6 @@ event:
   version: 1
 
 types:
-
   $ArrayObj:
     anotherStr:
       of: string
