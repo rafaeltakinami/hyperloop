@@ -15,7 +15,7 @@ apply plugin: 'com.novoda.bintray-release'
 publish {
     artifactId = 'hyperloop-transport'
     autoPublish = true
-    userOrg = "guiabolso"
+    userOrg = "gb-opensource"
     desc = 'Transport classes for hyperloop'
     groupId = 'br.com.guiabolso'
     licences = ['APACHE-2.0']
