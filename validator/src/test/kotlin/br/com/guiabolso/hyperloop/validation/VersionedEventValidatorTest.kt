@@ -67,6 +67,7 @@ class VersionedEventValidatorTest {
             id = "id"
             payload = JsonObject().apply {
                 addProperty("answer", 42)
+                addProperty("nullValue", "test")
                 add("nested", JsonObject().apply { addProperty("someStr", "wow such code") })
                 add("array",
                     JsonArray().apply {

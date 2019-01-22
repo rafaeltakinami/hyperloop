@@ -24,6 +24,11 @@ types:
       of: int
       is:
         - required
+    nullValue:
+      of: string
+      is:
+        - required
+        - nullable
     nested:
       of: $Nested
       is:

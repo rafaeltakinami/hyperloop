@@ -18,7 +18,8 @@ data class ScalarNode(
 
     fun validate(element: JsonElement?) {
         when {
-            element.isNull() && !nullable -> InvalidInputException("Element in path $path cannot be null.")
+            element.isNull() && nullable -> return
+            element.isNull() && !nullable -> throw InvalidInputException("Element in path $path cannot be null.")
             element is JsonArray -> for (el in element) {
                 this.validate(el)
             }
