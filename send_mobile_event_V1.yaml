@@ -1,11 +1,32 @@
 schema:
-  version: 1
+  version: 2
 
 event:
   name: send:mobile:event
   version: 1
 
 types:
+  $Payload:
+    name:
+      of: string
+      is:
+        - required
+    createdAt:
+      of: string
+      is:
+        - required
+    properties:
+      of: array($Property)
+  $Identity:
+    userId:
+      of: long
+      is:
+        - required
+  $Metadata:
+    origin:
+      of: string
+      is:
+        - required
   $Property:
     key:
       of: string
@@ -22,24 +43,29 @@ types:
 
 validation:
   payload:
-    name:
-      of: string
-      is:
-        - required
-    createdAt:
-      of: string
-      is:
-        - required
-    properties:
-      of: array($Property)
-
+    of: $Payload
+    is:
+      - required
   identity:
-    userId:
-      of: long
-      is:
-        - required
+    of: $Identity
+    is:
+      - required
   metadata:
-    origin:
-      of: string
-      is:
-        - required
+    of: $Metadata
+    is:
+      - required
+
+streaming:
+  database: mobile_events
+  tables:
+    user_events:
+      event_id: $.flowId
+      event_name: $.payload.name
+      created_at: $.payload.createdAt
+      user_id: $.identity.userId
+      origin: $.metadata.origin
+
+    properties[$.payload.properties]:
+      event_id: $.flowId
+      key: '@.key'
+      value: '@.value'
