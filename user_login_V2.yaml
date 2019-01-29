@@ -27,8 +27,6 @@ validation:
       of: string
       is:
         - required
-    optedIn:
-      of: boolean
     userType:
       of: string
       is:

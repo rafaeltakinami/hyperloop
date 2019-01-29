@@ -13,13 +13,9 @@ validation:
       of: long
       is:
         - required
-    version:
-      of: long
-      is:
-        - required
-    app_version:
+    appVersion:
       of: string
-    authentication_session_id:
+    authenticationSessionId:
       of: long
       is:
         - required
@@ -27,7 +23,7 @@ validation:
       of: date(yyyy-MM-dd HH:mm:ss Z)
       is:
         - required
-    device_id:
+    deviceId:
       of: long
       is:
         - required
@@ -35,17 +31,15 @@ validation:
       of: string
       is:
         - required
-    notification_id:
-      of: long
-    origin_type:
+    originType:
       of: string
       is:
         - required
-    session_id:
+    sessionId:
       of: string
       is:
         - required
-    login_type:
+    loginType:
       of: string
       is:
         - required
