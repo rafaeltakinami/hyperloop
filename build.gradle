@@ -8,14 +8,14 @@ buildscript {
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
 
-        classpath 'com.novoda:bintray-release:0.9'
+        classpath 'com.novoda:bintray-release:0.8.1'
     }
 }
 
 
 allprojects {
     ext {
-        publish_version = '2.0.1'
+        publish_version = '2.0.2'
     }
 }
 
@@ -23,8 +23,8 @@ subprojects {
     apply plugin: 'kotlin'
 
     sourceSets {
-        main.java.srcDirs += 'src/main/kotlin'
-        test.java.srcDirs += 'src/test/kotlin'
+        main.java.srcDirs += 'src/main/kotlin/'
+        test.java.srcDirs += 'src/test/kotlin/'
     }
 
     group 'br.com.guiabolso'
