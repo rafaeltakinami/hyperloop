@@ -59,6 +59,7 @@ streaming:
   database: mobile_events
   tables:
     user_events:
+      session_id: $.id
       event_id: $.flowId
       event_name: $.payload.name
       created_at: $.payload.createdAt
