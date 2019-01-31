@@ -5,6 +5,7 @@ import br.com.guiabolso.hyperloop.schemas.SchemaRepository
 import br.com.guiabolso.hyperloop.validation.PrimitiveTypes
 import br.com.guiabolso.hyperloop.validation.PrimitiveTypes.INT
 import br.com.guiabolso.hyperloop.validation.PrimitiveTypes.STRING
+import br.com.guiabolso.hyperloop.validation.v2.parser.exceptions.TypeNotFoundException
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.ArrayNode
@@ -50,15 +51,21 @@ class SchemaTreeRepository(
                 node.isJsonArray() -> mapResult.putAll(
                     createNodes(
                         "$nodePath.$key[*]",
-                        types[node.rawType()] as ObjectNode,
+                        nextNode(types, node),
                         types
                     )
                 )
-                else -> mapResult.putAll(createNodes("$nodePath.$key", types[node.rawType()] as ObjectNode, types))
+                else -> mapResult.putAll(createNodes("$nodePath.$key", nextNode(types, node), types))
             }
         }
         return mapResult
     }
+
+    private fun nextNode(
+        types: ObjectNode,
+        node: JsonNode
+    ) = types[node.rawType()] as? ObjectNode
+        ?: throw TypeNotFoundException("Could not find type ${node.rawType()} in schema")
 
     private fun createDefaultNodes(nodePath: String): MutableMap<String, ScalarNode> =
         when {
