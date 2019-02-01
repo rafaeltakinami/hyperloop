@@ -1,14 +1,24 @@
 schema:
-  version: 1
-  
+  version: 2
+
 event:
   name: user:login
   version: 2
-  
-types:
 
-validation:
-  payload:
+types:
+  $Metadata:
+    origin:
+      of: string
+      is:
+        - required
+
+  $Identity:
+    userId:
+      of: long
+      is:
+        - required
+
+  $Payload:
     name:
       of: string
       is:
@@ -47,15 +57,18 @@ validation:
       of: string
       is:
         - required
-      
-  identity:
-    userId:
-      of: long
-      is:
-        - required
 
+validation:
+  payload:
+    of: $Payload
+    is:
+      - required
+  identity:
+    of: $Identity
+    is:
+      - required
   metadata:
-    origin:
-      of: string
-      is:
-        - required
+    of: $Metadata
+    is:
+      - required
+
