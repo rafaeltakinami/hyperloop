@@ -1,0 +1,70 @@
+schema:
+  version: 2
+
+event:
+  name: insert:login:history
+  version: 2
+
+types:
+  $Payload:
+    id:
+      of: long
+      is:
+        - required
+    appVersion:
+      of: string
+    authenticationSessionId:
+      of: long
+      is:
+        - required
+    created:
+      of: datetime
+      is:
+        - required
+    deviceId:
+      of: long
+      is:
+        - required
+    ip:
+      of: string
+      is:
+        - required
+    originType:
+      of: string
+      is:
+        - required
+    sessionId:
+      of: string
+      is:
+        - required
+    loginType:
+      of: string
+      is:
+        - required
+  $Identity:
+    userId:
+      of: long
+      is:
+        - required
+  $Metadata:
+    origin:
+      of: string
+      is:
+        - required
+
+validation:
+  payload:
+    of: $Payload
+    is:
+      - required
+
+  identity:
+    of: $Identity
+    is:
+      - required
+
+  metadata:
+    of: $Metadata
+    is:
+      - required
+
