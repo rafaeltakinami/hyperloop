@@ -1,20 +1,28 @@
 schema:
-  version: 1
+  version: 2
 
 event:
   name: insert:device
-  version: 1
+  version: 2
 
 types:
-
-validation:
-  payload:
+  $Identity:
+    userId:
+      of: long
+      is:
+        - required
+  $Metadata:
+    origin:
+      of: string
+      is:
+        - required
+  $Payload:
     id:
       of: long
       is:
         - required
     created:
-      of: date(yyyy-MM-dd HH:mm:ss Z)
+      of: datetime
       is:
         - required
     name:
@@ -33,15 +41,18 @@ validation:
     push_notification_token:
       of: string
 
-  identity:
-    userId:
-      of: long
-      is:
-        - required
+validation:
+  payload:
+    of: $Payload
+    is:
+      - required
 
+  identity:
+    of: $Identity
+    is:
+      - required
   metadata:
-    origin:
-      of: string
-      is:
-        - required
+    of: $Metadata
+    is:
+      - required
 
