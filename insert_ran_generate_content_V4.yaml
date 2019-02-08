@@ -1,0 +1,119 @@
+schema:
+  version: 2
+
+event:
+  name: insert:ran:generate:content
+  version: 4
+
+types:
+  $Payload:
+    onModelControlGroup:
+      of: boolean
+      is:
+        - required
+    createdAt:
+      of: string
+      is:
+        - required
+    cards:
+      of: array($Cards)
+  
+  $Identity:
+    userId:
+      of: long
+      is:
+        - required
+  
+  $Metadata:
+    origin:
+      of: string
+      is:
+        - required
+  $Cards:
+    userCardId:
+      of: string
+      is:
+        - required
+    cardId:
+      of: long
+      is:
+        - required
+    message_type:
+      of: string
+      is:
+        - required
+    link:
+      of: string
+      is:
+        - required
+    template:
+      of: string
+      is:
+        - required
+    tag:
+      of: string
+      is:
+        - required
+    segment:
+      of: $Segment
+
+  $Segment:
+     id:
+      of: long
+      is:
+        - required
+    modelName:
+      of: string
+      is:
+        - required
+    modelOutput:
+      of: string
+      is:
+        - required
+    intention:
+      of: string
+      is:
+        - required
+
+validation:
+  payload:
+    of: $Payload
+    is:
+      - required
+  identity:
+    of: $Identity
+    is:
+      - required
+  metadata:
+    of: $Metadata
+    is:
+      - required
+
+streaming:
+  database: insert_generate_content
+  tables:
+    event:
+      session_id: $.id
+      event_id: $.flowId
+      created_at: $.payload.createdAt
+      user_id: $.identity.userId
+      origin: $.metadata.origin
+      on_model_control_group: $.payload.onModelControlGroup
+
+    cards[$.payload.cards]:
+      event_id: $.flowId
+      user_card_id: '@.userCardId'
+      tag: '@.tag'
+      card_id: '@.cardId'
+      message_type: '@.message_type'
+      link: '@.link'
+      template: '@.template'
+      segment_id: '@.segment.id'
+
+    segment[$.payload.cards.segment]:
+      event_id: $.flowId
+      id: '@.id'
+      model_name: '@.modelName'
+      model_output: '@.modelOutput'
+      intention: '@.intention'
+
