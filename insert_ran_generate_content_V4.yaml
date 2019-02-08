@@ -110,7 +110,7 @@ streaming:
       template: '@.template'
       segment_id: '@.segment.id'
 
-    segment[$.payload.cards.segment]:
+    segment[$.payload.cards[*].segment]:
       event_id: $.flowId
       id: '@.id'
       model_name: '@.modelName'
