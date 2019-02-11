@@ -62,15 +62,15 @@ types:
       of: long
       is:
         - required
-    modelName:
+     modelName:
       of: string
       is:
         - required
-    modelOutput:
+     modelOutput:
       of: string
       is:
         - required
-    intention:
+     intention:
       of: string
       is:
         - required
