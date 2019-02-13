@@ -7,10 +7,12 @@ import br.com.guiabolso.hyperloop.exceptions.InvalidInputException
 import br.com.guiabolso.hyperloop.exceptions.SendMessageException
 import br.com.guiabolso.hyperloop.transport.MessageResult
 import br.com.guiabolso.hyperloop.transport.Transport
+import br.com.guiabolso.hyperloop.util.Clock
 import br.com.guiabolso.hyperloop.validation.ValidationResult
 import br.com.guiabolso.hyperloop.validation.Validator
 import br.com.guiabolso.hyperloop.validation.exceptions.ValidationException
 import com.github.salomonbrys.kotson.jsonObject
+import com.github.salomonbrys.kotson.set
 import com.google.gson.Gson
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.mock
@@ -18,6 +20,7 @@ import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import org.junit.Before
 import org.junit.Test
+import org.mockito.Mockito
 import java.util.UUID
 
 class HyperloopTest {
@@ -26,6 +29,7 @@ class HyperloopTest {
     private lateinit var transport: Transport
     private lateinit var validator: Validator
     private lateinit var cryptographyEngine: MessageCypher
+    private lateinit var clock: Clock
     private lateinit var event: RequestEvent
     private lateinit var eventMD5: String
     private val gson = Gson()
@@ -35,7 +39,8 @@ class HyperloopTest {
         transport = mock()
         cryptographyEngine = mock()
         validator = mock()
-        hyperloop = Hyperloop(transport, validator, cryptographyEngine)
+        clock = Mockito.mock(Clock::class.java)
+        hyperloop = Hyperloop(transport, validator, cryptographyEngine, clock)
 
         event = EventBuilder.event {
             name = "test:event"
@@ -46,17 +51,16 @@ class HyperloopTest {
             auth = jsonObject()
             metadata = jsonObject("origin" to "Kyoto - Japan")
         }
-
-        eventMD5 = gson.toJson(event).md5()
     }
 
     @Test
     fun `test can send event as message`() {
+        val date = clock.dateNow()
+        event.metadata["receivedAt"] = date
+        eventMD5 = gson.toJson(event).md5()
         whenever(transport.sendMessage(any())).thenReturn(MessageResult("some-id", eventMD5))
         whenever(validator.validate(any())).thenReturn(ValidationResult(true, mutableSetOf(), mutableSetOf()))
-        whenever(cryptographyEngine.cypher(any())).thenAnswer {
-            it.arguments[0] as String
-        }
+        whenever(cryptographyEngine.cypher(any())).thenReturn(gson.toJson(event))
 
         hyperloop.offer(event)
 
@@ -78,7 +82,13 @@ class HyperloopTest {
     @Test(expected = ValidationException::class)
     fun `test validate event fails`() {
         whenever(transport.sendMessage(any())).thenReturn(MessageResult("some-id", "wrong-md5-hash"))
-        whenever(validator.validate(any())).thenReturn(ValidationResult(false, mutableSetOf(InvalidInputException("some input was invalid")), mutableSetOf()))
+        whenever(validator.validate(any())).thenReturn(
+            ValidationResult(
+                false,
+                mutableSetOf(InvalidInputException("some input was invalid")),
+                mutableSetOf()
+            )
+        )
         whenever(cryptographyEngine.cypher(any())).thenAnswer {
             it.arguments[0] as String
         }
