@@ -27,6 +27,10 @@ types:
       of: string
       is:
         - required
+    receivedAt:
+      of: string
+      is:
+        - required
   $Property:
     key:
       of: string
@@ -62,6 +66,7 @@ streaming:
       session_id: $.id
       event_id: $.flowId
       event_name: $.payload.name
+      received_at: $metadata.receivedAt
       created_at: $.payload.createdAt
       user_id: $.identity.userId
       origin: $.metadata.origin

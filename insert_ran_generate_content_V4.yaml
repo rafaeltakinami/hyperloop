@@ -29,6 +29,10 @@ types:
       of: string
       is:
         - required
+    receivedAt:
+      of: string
+      is:
+        - required
   $Cards:
     userCardId:
       of: string
@@ -96,6 +100,7 @@ streaming:
       session_id: $.id
       event_id: $.flowId
       created_at: $.payload.createdAt
+      received_at: $receivedAt
       user_id: $.identity.userId
       origin: $.metadata.origin
       on_model_control_group: $.payload.onModelControlGroup
