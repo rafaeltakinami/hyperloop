@@ -7,7 +7,7 @@ import br.com.guiabolso.hyperloop.exceptions.InvalidInputException
 import br.com.guiabolso.hyperloop.exceptions.SendMessageException
 import br.com.guiabolso.hyperloop.transport.MessageResult
 import br.com.guiabolso.hyperloop.transport.Transport
-import br.com.guiabolso.hyperloop.util.Clock
+import br.com.guiabolso.hyperloop.util.DateIsoFormat
 import br.com.guiabolso.hyperloop.validation.ValidationResult
 import br.com.guiabolso.hyperloop.validation.Validator
 import br.com.guiabolso.hyperloop.validation.exceptions.ValidationException
@@ -20,27 +20,22 @@ import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import org.junit.Before
 import org.junit.Test
-import org.mockito.Mockito
 import java.util.UUID
 
 class HyperloopTest {
 
     private lateinit var hyperloop: Hyperloop
-    private lateinit var transport: Transport
-    private lateinit var validator: Validator
-    private lateinit var cryptographyEngine: MessageCypher
-    private lateinit var clock: Clock
+    private val transport: Transport = mock()
+    private var validator: Validator = mock()
+    private var cryptographyEngine: MessageCypher = mock()
+    private var dateIsoFormat: DateIsoFormat = mock()
     private lateinit var event: RequestEvent
     private lateinit var eventMD5: String
     private val gson = Gson()
 
     @Before
     fun setUp() {
-        transport = mock()
-        cryptographyEngine = mock()
-        validator = mock()
-        clock = Mockito.mock(Clock::class.java)
-        hyperloop = Hyperloop(transport, validator, cryptographyEngine, clock)
+        hyperloop = Hyperloop(transport, validator, cryptographyEngine, dateIsoFormat)
 
         event = EventBuilder.event {
             name = "test:event"
@@ -55,7 +50,7 @@ class HyperloopTest {
 
     @Test
     fun `test can send event as message`() {
-        val date = clock.dateNow()
+        val date = dateIsoFormat.dateNow()
         event.metadata["receivedAt"] = date
         eventMD5 = gson.toJson(event).md5()
         whenever(transport.sendMessage(any())).thenReturn(MessageResult("some-id", eventMD5))
